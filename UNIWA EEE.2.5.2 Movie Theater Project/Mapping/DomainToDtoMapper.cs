@@ -5,6 +5,17 @@ namespace MovieTheaterProject.Mapping;
 
 public static class DomainToDtoMapper
 {
+    public static MovieTheaterDto ToMovieTheaterDto(this MovieTheater movieTheater)
+    {
+        return new()
+        {
+            Id = movieTheater.Id.Value.ToString(),
+            Name = movieTheater.Name.Value,
+            Rows = movieTheater.Rows.Value,
+            Columns = movieTheater.Columns.Value
+        };
+    }
+
     public static MovieDto ToMovieDto(this Movie movie)
     {
         return new()

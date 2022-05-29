@@ -1,10 +1,35 @@
-using MovieTheaterProject.Contracts.Responses;
+﻿using MovieTheaterProject.Contracts.Responses;
 using MovieTheaterProject.Domain;
 
 namespace MovieTheaterProject.Mapping;
 
 public static class DomainToApiContractMapper
 {
+    public static MovieTheaterResponse ToMovieTheaterResponse(this MovieTheater movieTheater)
+    {
+        return new()
+        {
+            Id = movieTheater.Id.Value,
+            Name = movieTheater.Name.Value,
+            Rows = movieTheater.Rows.Value,
+            Columns = movieTheater.Columns.Value
+        };
+    }
+
+    public static GetAllMovieTheatersResponse ToMovieTheaterResponse(this IEnumerable<MovieTheater> movieTheaters)
+    {
+        return new()
+        {
+            MovieTheaters = movieTheaters.Select(movieTheater => new MovieTheaterResponse
+            {
+                Id = movieTheater.Id.Value,
+                Name = movieTheater.Name.Value,
+                Rows = movieTheater.Rows.Value,
+                Columns = movieTheater.Columns.Value
+            })
+        };
+    }
+
     public static MovieResponse ToMovieResponse(this Movie movie)
     {
         return new()

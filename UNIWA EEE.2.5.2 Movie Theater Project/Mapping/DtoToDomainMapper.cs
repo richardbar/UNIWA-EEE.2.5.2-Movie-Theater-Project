@@ -1,4 +1,4 @@
-using MovieTheaterProject.Contracts.Data;
+﻿using MovieTheaterProject.Contracts.Data;
 using MovieTheaterProject.Domain;
 using MovieTheaterProject.Domain.Common;
 
@@ -6,6 +6,17 @@ namespace MovieTheaterProject.Mapping;
 
 public static class DtoToDomainMapper
 {
+    public static MovieTheater ToMovieTheater(this MovieTheaterDto movieTheaterDto)
+    {
+        return new()
+        {
+            Id = MovieTheaterId.From(Guid.Parse(movieTheaterDto.Id)),
+            Name = Name.From(movieTheaterDto.Name),
+            Rows = RowsColumns.From(movieTheaterDto.Rows),
+            Columns = RowsColumns.From(movieTheaterDto.Columns)
+        };
+    }
+
     public static Movie ToMovie(this MovieDto movieDto)
     {
         return new()
