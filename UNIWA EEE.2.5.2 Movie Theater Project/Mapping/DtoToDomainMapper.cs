@@ -24,7 +24,7 @@ public static class DtoToDomainMapper
             Id = MovieId.From(Guid.Parse(movieDto.Id)),
             Name = Name.From(movieDto.Name),
             Price = Price.From(movieDto.Price),
-            Duration = MovieDuration.From(TimeSpan.Parse(movieDto.Duration))
+            Duration = MovieDuration.From(movieDto.Duration)
         };
     }
 }

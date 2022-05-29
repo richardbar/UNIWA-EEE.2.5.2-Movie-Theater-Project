@@ -23,7 +23,7 @@ public static class DomainToDtoMapper
             Id = movie.Id.Value.ToString(),
             Name = movie.Name.Value,
             Price = movie.Price.Value,
-            Duration = movie.Duration.Value.ToString()
+            Duration = movie.Duration.Value
         };
     }
 }

@@ -8,5 +8,5 @@ public class MovieDto
 
     public float Price { get; init; } = .0f;
 
-    public string Duration { get; init; } = default!;
+    public long Duration { get; init; } = default!;
 }

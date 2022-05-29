@@ -8,5 +8,5 @@ public sealed class MovieResponse
 
     public float Price { get; init; } = .0f;
 
-    public TimeSpan Duration { get; init; }
+    public long Duration { get; init; }
 }

@@ -35,7 +35,7 @@ public static class ApiContractToDomainMapper
             Id = MovieId.From(Guid.NewGuid()),
             Name = Name.From(request.Name),
             Price = Price.From(request.Price),
-            Duration = MovieDuration.From(TimeSpan.Parse(request.Duration))
+            Duration = MovieDuration.From(request.Duration)
         };
     }
 
@@ -46,7 +46,7 @@ public static class ApiContractToDomainMapper
             Id = MovieId.From(request.Id),
             Name = Name.From(request.Name),
             Price = Price.From(request.Price),
-            Duration = MovieDuration.From(TimeSpan.Parse(request.Duration))
+            Duration = MovieDuration.From(request.Duration)
         };
     }
 }

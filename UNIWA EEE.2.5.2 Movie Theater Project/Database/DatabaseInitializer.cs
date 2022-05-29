@@ -18,7 +18,7 @@ public sealed class DatabaseInitializer
         Id CHAR(36) PRIMARY KEY, 
         Name TEXT NOT NULL,
         Price REAL NOT NULL,
-        Duration TEXT NOT NULL)");
+        Duration INTEGER(8) NOT NULL)");
         await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS MovieTheaters (
         Id CHAR(36) PRIMARY KEY, 
         Name TEXT NOT NULL,
