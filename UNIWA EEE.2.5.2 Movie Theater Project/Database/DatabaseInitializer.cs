@@ -14,6 +14,10 @@ public sealed class DatabaseInitializer
     public async Task InitializeAsync()
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-        await connection.ExecuteAsync("");
+        await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS Movies (
+        Id CHAR(36) PRIMARY KEY, 
+        Name TEXT NOT NULL,
+        Price REAL NOT NULL,
+        Duration TEXT NOT NULL)");
     }
 }

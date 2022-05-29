@@ -1,6 +1,6 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
-
+using MovieTheaterProject.Database;
 using MovieTheaterProject.Installer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,5 +27,8 @@ if (app.Environment.IsDevelopment())
     app.UseOpenApi();
     app.UseSwaggerUi3(s => s.ConfigureDefaults());
 }
+
+var databaseInitializer = app.Services.GetRequiredService<DatabaseInitializer>();
+await databaseInitializer.InitializeAsync();
 
 app.Run();
