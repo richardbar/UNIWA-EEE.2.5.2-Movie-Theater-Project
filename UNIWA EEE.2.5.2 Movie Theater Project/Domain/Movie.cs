@@ -4,11 +4,11 @@ namespace MovieTheaterProject.Domain;
 
 public class Movie
 {
-    public MovieId Id { get; init; } = MovieId.From(Guid.NewGuid());
+    public MovieId Id { get; init; } = default!;
 
-    public MovieName Name { get; init; } = MovieName.From(default!);
+    public MovieName Name { get; init; } = default!;
 
-    public Price Price { get; init; } = Price.From(.0f);
+    public Price Price { get; init; } = default!;
 
-    public MovieDuration Duration { get; init; } = MovieDuration.From(Constants.MovieMinimumDuration);
+    public MovieDuration Duration { get; init; } = default!;
 }
