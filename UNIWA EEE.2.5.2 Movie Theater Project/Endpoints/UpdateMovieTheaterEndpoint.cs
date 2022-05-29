@@ -28,6 +28,8 @@ public sealed class UpdateMovieTheaterEndpoint : Endpoint<UpdateMovieTheaterRequ
             return;
         }
 
+        req.Rows = existingMovieTheater.Rows.Value;
+        req.Columns = existingMovieTheater.Columns.Value;
         var movieTheater = req.ToMovieTheater();
         await _movieTheaterService.UpdateAsync(movieTheater);
 

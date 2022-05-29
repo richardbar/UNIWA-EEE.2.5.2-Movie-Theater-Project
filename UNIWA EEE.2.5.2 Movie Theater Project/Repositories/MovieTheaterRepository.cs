@@ -42,7 +42,7 @@ public sealed class MovieTheaterRepository : IMovieTheaterRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
-            @"UPDATE MovieTheaters SET Name = @Name, Rows = @Rows, Columns = @Columns
+            @"UPDATE MovieTheaters SET Name = @Name
                 WHERE Id = @Id",
             movieTheater);
         return result > 0;

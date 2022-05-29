@@ -6,7 +6,7 @@ public class UpdateMovieTheaterRequest
 
     public string Name { get; init; } = default!;
 
-    public ushort Rows { get; init; } = default!;
+    internal ushort Rows { get; set; } = default!;
 
-    public ushort Columns { get; init; } = default!;
+    internal ushort Columns { get; set; } = default!;
 }
