@@ -1,4 +1,5 @@
-﻿using MovieTheaterProject.Services;
+﻿using MovieTheaterProject.Services.Movie;
+using MovieTheaterProject.Services.MovieTheater;
 
 namespace MovieTheaterProject.Installer;
 

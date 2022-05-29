@@ -1,4 +1,5 @@
-﻿using MovieTheaterProject.Contracts.Requests;
+﻿using MovieTheaterProject.Contracts.Requests.Movie;
+using MovieTheaterProject.Contracts.Requests.MovieTheater;
 using MovieTheaterProject.Domain;
 using MovieTheaterProject.Domain.Common;
 

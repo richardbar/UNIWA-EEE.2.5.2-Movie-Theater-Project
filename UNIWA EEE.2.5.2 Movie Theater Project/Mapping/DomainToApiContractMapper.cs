@@ -1,4 +1,5 @@
-﻿using MovieTheaterProject.Contracts.Responses;
+﻿using MovieTheaterProject.Contracts.Responses.Movie;
+using MovieTheaterProject.Contracts.Responses.MovieTheater;
 using MovieTheaterProject.Domain;
 
 namespace MovieTheaterProject.Mapping;
