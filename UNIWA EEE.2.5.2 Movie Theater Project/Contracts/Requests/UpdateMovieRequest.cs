@@ -8,5 +8,5 @@ public class UpdateMovieRequest
 
     public float Price { get; init; } = .0f;
 
-    public long Duration { get; init; } = default!;
+    internal long Duration { get; set; } = default!;
 }

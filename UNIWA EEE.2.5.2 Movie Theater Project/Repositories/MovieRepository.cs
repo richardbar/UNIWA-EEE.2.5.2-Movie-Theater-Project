@@ -42,7 +42,7 @@ public sealed class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
-            @"UPDATE Movies SET Name = @Name, Price = @Price, Duration = @Duration
+            @"UPDATE Movies SET Name = @Name, Price = @Price
                 WHERE Id = @Id",
             movie);
         return result > 0;

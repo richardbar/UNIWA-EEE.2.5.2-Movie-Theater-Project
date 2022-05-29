@@ -28,6 +28,7 @@ public sealed class UpdateMovieEndpoint : Endpoint<UpdateMovieRequest, MovieResp
             return;
         }
 
+        req.Duration = existingMovie.Duration.Value;
         var movie = req.ToMovie();
         await _movieService.UpdateAsync(movie);
 
