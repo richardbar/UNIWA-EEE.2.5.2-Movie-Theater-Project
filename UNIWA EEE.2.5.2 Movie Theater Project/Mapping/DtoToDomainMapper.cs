@@ -1,4 +1,4 @@
-﻿using MovieTheaterProject.Contracts.Data;
+using MovieTheaterProject.Contracts.Data;
 using MovieTheaterProject.Domain;
 using MovieTheaterProject.Domain.Common;
 
@@ -11,7 +11,7 @@ public static class DtoToDomainMapper
         return new()
         {
             Id = MovieId.From(Guid.Parse(movieDto.Id)),
-            Name = MovieName.From(movieDto.Name),
+            Name = Name.From(movieDto.Name),
             Price = Price.From(movieDto.Price),
             Duration = MovieDuration.From(TimeSpan.Parse(movieDto.Duration))
         };

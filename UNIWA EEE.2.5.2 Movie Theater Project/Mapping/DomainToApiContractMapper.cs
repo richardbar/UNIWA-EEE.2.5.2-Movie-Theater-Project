@@ -1,4 +1,4 @@
-﻿using MovieTheaterProject.Contracts.Responses;
+using MovieTheaterProject.Contracts.Responses;
 using MovieTheaterProject.Domain;
 
 namespace MovieTheaterProject.Mapping;
@@ -7,7 +7,7 @@ public static class DomainToApiContractMapper
 {
     public static MovieResponse ToMovieResponse(this Movie movie)
     {
-        return new MovieResponse
+        return new()
         {
             Id = movie.Id.Value,
             Name = movie.Name.Value,
@@ -18,7 +18,7 @@ public static class DomainToApiContractMapper
 
     public static GetAllMoviesResponse ToMoviesResponse(this IEnumerable<Movie> movies)
     {
-        return new GetAllMoviesResponse
+        return new()
         {
             Movies = movies.Select(movie => new MovieResponse
             {
