@@ -5,6 +5,18 @@ namespace MovieTheaterProject.API.Mapping;
 
 public static class DomainToDtoMapper
 {
+    public static MovieViewingDto ToMovieViewingDto(this MovieViewing movieViewing)
+    {
+        return new()
+        {
+            Id = movieViewing.Id.Value.ToString(),
+            MovieId = movieViewing.MovieId.Value.ToString(),
+            MovieTheaterId = movieViewing.MovieTheaterId.Value.ToString(),
+            StartTime = movieViewing.StartTime.Value,
+            Duration = movieViewing.Duration.Value,
+        };
+    }
+
     public static MovieTheaterDto ToMovieTheaterDto(this MovieTheater movieTheater)
     {
         return new()

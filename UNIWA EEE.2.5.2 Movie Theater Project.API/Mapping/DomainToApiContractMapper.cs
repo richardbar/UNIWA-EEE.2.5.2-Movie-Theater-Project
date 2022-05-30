@@ -1,11 +1,39 @@
 ﻿using MovieTheaterProject.API.Contracts.Responses.Movie;
 using MovieTheaterProject.API.Contracts.Responses.MovieTheater;
+using MovieTheaterProject.API.Contracts.Responses.MovieViewing;
 using MovieTheaterProject.API.Domain;
 
 namespace MovieTheaterProject.API.Mapping;
 
 public static class DomainToApiContractMapper
 {
+    public static MovieViewingResponse ToMovieViewingResponse(this MovieViewing movieViewing)
+    {
+        return new()
+        {
+            Id = movieViewing.Id.Value,
+            MovieId = movieViewing.MovieId.Value,
+            MovieTheaterId = movieViewing.MovieTheaterId.Value,
+            StartTime = movieViewing.StartTime.Value,
+            Duration = movieViewing.Duration.Value
+        };
+    }
+
+    public static GetAllMovieViewingsResponse ToMovieViewingResponse(this IEnumerable<MovieViewing> movieViewings)
+    {
+        return new()
+        {
+            MovieViewings = movieViewings.Select(movieViewing => new MovieViewingResponse
+            {
+                Id = movieViewing.Id.Value,
+                MovieId = movieViewing.MovieId.Value,
+                MovieTheaterId = movieViewing.MovieTheaterId.Value,
+                StartTime = movieViewing.StartTime.Value,
+                Duration = movieViewing.Duration.Value
+            })
+        };
+    }
+
     public static MovieTheaterResponse ToMovieTheaterResponse(this MovieTheater movieTheater)
     {
         return new()

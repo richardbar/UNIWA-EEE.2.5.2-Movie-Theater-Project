@@ -24,5 +24,11 @@ public sealed class DatabaseInitializer
         Name TEXT NOT NULL,
         Rows INT NOT NULL,
         Columns INT NOT NULL)");
+        await connection.ExecuteAsync(@"CREATE TABLE IF NOT EXISTS MovieViewings (
+        Id CHAR(36) PRIMARY KEY, 
+        MovieId TEXT(36) NOT NULL,
+        MovieTheaterId TEXT(36) NOT NULL,
+        StartTime INT(8) NOT NULL,
+        Duration INT(8) NOT NULL)");
     }
 }
