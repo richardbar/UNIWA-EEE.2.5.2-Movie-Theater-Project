@@ -1,5 +1,6 @@
 ﻿using MovieTheaterProject.API.Repositories.Movie;
 using MovieTheaterProject.API.Repositories.MovieTheater;
+using MovieTheaterProject.API.Repositories.MovieViewing;
 
 namespace MovieTheaterProject.API.Installer;
 
@@ -9,5 +10,6 @@ public sealed class RepositoryInstaller : IInstaller
     {
         services.AddSingleton<IMovieRepository, MovieRepository>();
         services.AddSingleton<IMovieTheaterRepository, MovieTheaterRepository>();
+        services.AddSingleton<IMovieViewingRepository, MovieViewingRepository>();
     }
 }
