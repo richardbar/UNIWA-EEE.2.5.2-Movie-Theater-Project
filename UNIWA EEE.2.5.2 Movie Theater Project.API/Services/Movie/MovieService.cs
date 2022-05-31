@@ -3,16 +3,21 @@ using FluentValidation.Results;
 
 using MovieTheaterProject.API.Mapping;
 using MovieTheaterProject.API.Repositories.Movie;
+using MovieTheaterProject.API.Repositories.MovieViewing;
 
 namespace MovieTheaterProject.API.Services.Movie;
 
 public sealed class MovieService : IMovieService
 {
     private readonly IMovieRepository _movieRepository;
+    private readonly IMovieViewingRepository _movieViewingRepository;
 
-    public MovieService(IMovieRepository movieRepository)
+    public MovieService(
+        IMovieRepository movieRepository,
+        IMovieViewingRepository movieViewingRepository)
     {
         _movieRepository = movieRepository;
+        _movieViewingRepository = movieViewingRepository;
     }
 
     public async Task<bool> CreateAsync(Domain.Movie movie)
@@ -51,6 +56,15 @@ public sealed class MovieService : IMovieService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
+        if ((await _movieViewingRepository.GetAsyncByMovieTheaterId(id)).Count() != 0)
+        {
+            var message = $"At least a movie viewing is scheduled for the movie with the id {id}";
+            throw new ValidationException(message, new[]
+            {
+                new ValidationFailure(nameof(MovieTheater), message)
+            });
+        }
+
         return await _movieRepository.DeleteAsync(id);
     }
 }

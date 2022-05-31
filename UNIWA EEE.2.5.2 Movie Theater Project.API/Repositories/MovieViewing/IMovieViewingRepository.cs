@@ -10,5 +10,9 @@ public interface IMovieViewingRepository
 
     Task<IEnumerable<MovieViewingDto>> GetAllAsync();
 
+    Task<IEnumerable<MovieViewingDto>> GetAsyncByMovieId(Guid id);
+
+    Task<IEnumerable<MovieViewingDto>> GetAsyncByMovieTheaterId(Guid id);
+
     Task<bool> DeleteAsync(Guid id);
 }

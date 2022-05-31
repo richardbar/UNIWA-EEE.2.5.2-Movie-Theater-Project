@@ -39,6 +39,20 @@ public sealed class MovieViewingRepository : IMovieViewingRepository
         return await connection.QueryAsync<MovieViewingDto>("SELECT * FROM MovieViewings");
     }
 
+    public async Task<IEnumerable<MovieViewingDto>> GetAsyncByMovieId(Guid id)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<MovieViewingDto>("SELECT * FROM MovieViewings WHERE MovieId = @Id",
+            new { Id = id.ToString() });
+    }
+
+    public async Task<IEnumerable<MovieViewingDto>> GetAsyncByMovieTheaterId(Guid id)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<MovieViewingDto>("SELECT * FROM MovieViewings WHERE MovieTheaterId = @Id",
+            new { Id = id.ToString() });
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
