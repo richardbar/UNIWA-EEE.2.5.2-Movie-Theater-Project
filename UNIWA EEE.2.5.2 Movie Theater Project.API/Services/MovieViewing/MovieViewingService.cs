@@ -5,6 +5,7 @@ using MovieTheaterProject.API.Mapping;
 using MovieTheaterProject.API.Repositories.Movie;
 using MovieTheaterProject.API.Repositories.MovieTheater;
 using MovieTheaterProject.API.Repositories.MovieViewing;
+using MovieTheaterProject.API.Repositories.Reservation;
 
 namespace MovieTheaterProject.API.Services.MovieViewing;
 
@@ -13,15 +14,18 @@ public class MovieViewingService : IMovieViewingService
     private readonly IMovieViewingRepository _movieViewingRepository;
     private readonly IMovieRepository _movieRepository;
     private readonly IMovieTheaterRepository _movieTheaterRepository;
+    private readonly IReservationRepository _reservationRepository;
 
     public MovieViewingService(
         IMovieViewingRepository movieViewingRepository,
         IMovieRepository movieRepository,
-        IMovieTheaterRepository movieTheaterRepository)
+        IMovieTheaterRepository movieTheaterRepository,
+        IReservationRepository reservationRepository)
     {
         _movieViewingRepository = movieViewingRepository;
         _movieRepository = movieRepository;
         _movieTheaterRepository = movieTheaterRepository;
+        _reservationRepository = reservationRepository;
     }
 
     public async Task<bool> CreateAsync(Domain.MovieViewing movieViewing)
@@ -64,6 +68,14 @@ public class MovieViewingService : IMovieViewingService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
+        if ((await _reservationRepository.GetAsyncByMovieViewingId(id)).Count() != 0)
+        {
+            var message = $"At least a reservation for the movie viewing with the id {id}";
+            throw new ValidationException(message, new[]
+            {
+                new ValidationFailure(nameof(MovieViewing), message)
+            });
+        }
         return await _movieViewingRepository.DeleteAsync(id);
     }
 }
