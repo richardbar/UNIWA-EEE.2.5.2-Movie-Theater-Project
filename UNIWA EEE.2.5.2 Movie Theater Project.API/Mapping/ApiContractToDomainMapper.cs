@@ -1,6 +1,7 @@
 ﻿using MovieTheaterProject.API.Contracts.Requests.Movie;
 using MovieTheaterProject.API.Contracts.Requests.MovieTheater;
 using MovieTheaterProject.API.Contracts.Requests.MovieViewing;
+using MovieTheaterProject.API.Contracts.Requests.Reservation;
 using MovieTheaterProject.API.Domain;
 using MovieTheaterProject.API.Domain.Common;
 
@@ -8,6 +9,18 @@ namespace MovieTheaterProject.API.Mapping;
 
 public static class ApiContractToDomainMapper
 {
+    public static Reservation ToReservation(this CreateReservationRequest request)
+    {
+        return new()
+        {
+            Id = ReservationId.From(Guid.NewGuid()),
+            MovieViewingId = MovieViewingId.From(Guid.Parse(request.MovieViewingId)),
+            Row = RowsColumns.From(request.Row),
+            Column = RowsColumns.From(request.Column),
+            SeatsSelected = RowsColumns.From(request.SeatsSelected)
+        };
+    }
+
     public static MovieViewing ToMovieViewing(this CreateMovieViewingRequest request)
     {
         return new()

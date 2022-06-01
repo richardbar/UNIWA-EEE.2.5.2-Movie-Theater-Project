@@ -5,6 +5,18 @@ namespace MovieTheaterProject.API.Mapping;
 
 public static class DomainToDtoMapper
 {
+    public static ReservationDto ToReservationDto(this Reservation reservation)
+    {
+        return new()
+        {
+            Id = reservation.Id.Value.ToString(),
+            MovieViewingId = reservation.MovieViewingId.Value.ToString(),
+            Row = reservation.Row.Value,
+            Column = reservation.Column.Value,
+            SeatsSelected = reservation.SeatsSelected.Value
+        };
+    }
+
     public static MovieViewingDto ToMovieViewingDto(this MovieViewing movieViewing)
     {
         return new()

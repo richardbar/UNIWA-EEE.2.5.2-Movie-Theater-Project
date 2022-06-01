@@ -1,12 +1,40 @@
 ﻿using MovieTheaterProject.API.Contracts.Responses.Movie;
 using MovieTheaterProject.API.Contracts.Responses.MovieTheater;
 using MovieTheaterProject.API.Contracts.Responses.MovieViewing;
+using MovieTheaterProject.API.Contracts.Responses.Reservation;
 using MovieTheaterProject.API.Domain;
 
 namespace MovieTheaterProject.API.Mapping;
 
 public static class DomainToApiContractMapper
 {
+    public static ReservationResponse ToReservationResponse(this Reservation reservation)
+    {
+        return new()
+        {
+            Id = reservation.Id.Value,
+            MovieViewingId = reservation.MovieViewingId.Value,
+            Row = reservation.Row.Value,
+            Column = reservation.Column.Value,
+            SeatsSelected = reservation.SeatsSelected.Value
+        };
+    }
+
+    public static GetAllReservationsResponse ToReservationResponse(this IEnumerable<Reservation> reservations)
+    {
+        return new()
+        {
+            Reservations = reservations.Select(reservation => new ReservationResponse
+            {
+                Id = reservation.Id.Value,
+                MovieViewingId = reservation.MovieViewingId.Value,
+                Row = reservation.Row.Value,
+                Column = reservation.Column.Value,
+                SeatsSelected = reservation.SeatsSelected.Value
+            })
+        };
+    }
+
     public static MovieViewingResponse ToMovieViewingResponse(this MovieViewing movieViewing)
     {
         return new()
