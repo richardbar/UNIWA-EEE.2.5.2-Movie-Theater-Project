@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32519.111
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UNIWA EEE.2.5.2 Movie Theater Project.API", "UNIWA EEE.2.5.2 Movie Theater Project.API\UNIWA EEE.2.5.2 Movie Theater Project.API.csproj", "{355EBB28-CCC0-424A-93C4-BAD4A78906B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNIWA EEE.2.5.2 Movie Theater Project.Domain", "src\UNIWA EEE.2.5.2 Movie Theater Project.Domain\UNIWA EEE.2.5.2 Movie Theater Project.Domain.csproj", "{55683162-DF00-45EA-B737-3DB655A44590}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UNIWA EEE.2.5.2 Movie Theater Project.API", "src\UNIWA EEE.2.5.2 Movie Theater Project.API\UNIWA EEE.2.5.2 Movie Theater Project.API.csproj", "{5C14607A-98B5-4D86-A293-8DF66A7F075E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{355EBB28-CCC0-424A-93C4-BAD4A78906B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{355EBB28-CCC0-424A-93C4-BAD4A78906B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{355EBB28-CCC0-424A-93C4-BAD4A78906B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{355EBB28-CCC0-424A-93C4-BAD4A78906B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55683162-DF00-45EA-B737-3DB655A44590}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55683162-DF00-45EA-B737-3DB655A44590}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55683162-DF00-45EA-B737-3DB655A44590}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55683162-DF00-45EA-B737-3DB655A44590}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C14607A-98B5-4D86-A293-8DF66A7F075E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C14607A-98B5-4D86-A293-8DF66A7F075E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C14607A-98B5-4D86-A293-8DF66A7F075E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C14607A-98B5-4D86-A293-8DF66A7F075E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
