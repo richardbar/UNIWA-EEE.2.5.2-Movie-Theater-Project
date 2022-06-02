@@ -44,6 +44,7 @@ public static class DtoToDomainMapper
         {
             Id = MovieId.From(Guid.Parse(movieDto.Id)),
             Name = Name.From(movieDto.Name),
+            Description = MovieDescription.From(movieDto.Description),
             Price = Price.From(movieDto.Price),
             Duration = MovieDuration.From(movieDto.Duration)
         };

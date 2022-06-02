@@ -8,6 +8,8 @@ public class UpdateMovieRequest
 
     public string Name { get; init; } = default!;
 
+    public string Description { get; init; } = default!;
+
     public float Price { get; init; } = .0f;
 
     [JsonIgnore]

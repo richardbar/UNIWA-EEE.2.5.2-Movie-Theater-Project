@@ -9,4 +9,6 @@ public static class Constants
     public static long MovieViewingsStart { get; } = 18 * 60 * 60;
     
     public static long MovieViewingsEnd { get; } = 26 * 60 * 60;
+
+    public static ushort MovieDescriptMaxLength { get; } = 4096;
 }

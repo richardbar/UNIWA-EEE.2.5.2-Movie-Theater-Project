@@ -44,6 +44,7 @@ public static class DomainToDtoMapper
         {
             Id = movie.Id.Value.ToString(),
             Name = movie.Name.Value,
+            Description = movie.Description.Value,
             Price = movie.Price.Value,
             Duration = movie.Duration.Value
         };

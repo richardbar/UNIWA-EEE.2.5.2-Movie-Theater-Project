@@ -17,8 +17,8 @@ public sealed class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
-            @"INSERT INTO Movies (Id, Name, Price, Duration) 
-            VALUES (@Id, @Name, @Price, @Duration)",
+            @"INSERT INTO Movies (Id, Name, Description, Price, Duration) 
+            VALUES (@Id, @Name, @Description, @Price, @Duration)",
             movie);
         return result > 0;
     }

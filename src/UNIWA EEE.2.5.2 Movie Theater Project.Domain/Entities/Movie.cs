@@ -8,6 +8,8 @@ public class Movie
 
     public Name Name { get; init; } = default!;
 
+    public MovieDescription Description { get; init; } = default!;
+
     public Price Price { get; init; } = default!;
 
     public MovieDuration Duration { get; init; } = default!;

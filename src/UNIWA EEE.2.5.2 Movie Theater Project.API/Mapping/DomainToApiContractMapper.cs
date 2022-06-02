@@ -88,6 +88,7 @@ public static class DomainToApiContractMapper
         {
             Id = movie.Id.Value,
             Name = movie.Name.Value,
+            Description = movie.Description.Value,
             Price = movie.Price.Value,
             Duration = movie.Duration.Value
         };
@@ -101,6 +102,7 @@ public static class DomainToApiContractMapper
             {
                 Id = movie.Id.Value,
                 Name = movie.Name.Value,
+                Description = movie.Description.Value,
                 Price = movie.Price.Value,
                 Duration = movie.Duration.Value
             })
