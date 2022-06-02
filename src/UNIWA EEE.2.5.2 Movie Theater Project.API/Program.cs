@@ -19,6 +19,8 @@ installers.ForEach(installer => installer.InstallService(builder.Services, build
 
 var app = builder.Build();
 
+app.UseCors();
+
 app.UseAuthorization();
 app.UseFastEndpoints();
 
