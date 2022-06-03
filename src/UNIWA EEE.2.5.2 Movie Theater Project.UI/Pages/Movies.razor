@@ -1,0 +1,47 @@
+﻿@page "/movies"
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@inject HttpClient Http
+
+<PageTitle>Movies</PageTitle>
+
+<h1>Movies</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (movies == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var movie in movies)
+            {
+                <tr>
+                    <td>@movie.Name</td>
+                    <td>@movie.Description.Substring(0, Math.Min(150, movie.Description.Length))</td>
+                    <td>@movie.Price</td>
+                    <td>@movie.Duration</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private MovieResponse[]? movies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        movies = (await Http.GetFromJsonAsync<GetAllMoviesResponse>("api/movies")).Movies.ToArray();
+    }
+}

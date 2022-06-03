@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNIWA EEE.2.5.2 Movie Theat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UNIWA EEE.2.5.2 Movie Theater Project.API", "src\UNIWA EEE.2.5.2 Movie Theater Project.API\UNIWA EEE.2.5.2 Movie Theater Project.API.csproj", "{5C14607A-98B5-4D86-A293-8DF66A7F075E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNIWA EEE.2.5.2 Movie Theater Project.UI", "src\UNIWA EEE.2.5.2 Movie Theater Project.UI\UNIWA EEE.2.5.2 Movie Theater Project.UI.csproj", "{572B22DE-8C3A-43CF-95A0-0F25CF99FDD4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5C14607A-98B5-4D86-A293-8DF66A7F075E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C14607A-98B5-4D86-A293-8DF66A7F075E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C14607A-98B5-4D86-A293-8DF66A7F075E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{572B22DE-8C3A-43CF-95A0-0F25CF99FDD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{572B22DE-8C3A-43CF-95A0-0F25CF99FDD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{572B22DE-8C3A-43CF-95A0-0F25CF99FDD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{572B22DE-8C3A-43CF-95A0-0F25CF99FDD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
