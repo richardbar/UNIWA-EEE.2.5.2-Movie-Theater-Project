@@ -30,7 +30,7 @@ else
                     <td>@movie.Name</td>
                     <td>@movie.Description.Substring(0, Math.Min(150, movie.Description.Length))</td>
                     <td>@movie.Price</td>
-                    <td>@(new TimeSpan(0, 0, (int)(movie.Duration)).Hours):@(new TimeSpan(0, 0, (int)(movie.Duration)).Minutes)</td>
+                    <td>@(new TimeSpan(0, 0, (int)(movie.Duration)).Hours):@(new TimeSpan(0, 0, (int)(movie.Duration)).Minutes):00</td>
                     <td><button type="button" class="btn btn-info" @onclick="@(e => ViewMovieDetails(movie.Id))">Details</button></td>
                 </tr>
             }
