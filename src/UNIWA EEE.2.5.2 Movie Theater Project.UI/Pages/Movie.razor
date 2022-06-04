@@ -1,0 +1,49 @@
+﻿@page "/movie/{Id:guid}"
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
+<PageTitle>Movies</PageTitle>
+
+<h1>Movies</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (movie is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+    <h4>Attendee</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">Name</dt>
+        <dd class = "col-sm-10">@movie!.Name</dd>
+        <dt class = "col-sm-2">Description</dt>
+        <dd class = "col-sm-10">@movie!.Description</dd>
+        <dt class = "col-sm-2">Price</dt>
+        <dd class = "col-sm-10">@movie!.Price</dd>
+        <dt class = "col-sm-2">Duration</dt>
+        <dd class = "col-sm-10">@duration.TotalHours:@duration.Minutes</dd>
+    </dl>
+</div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private MovieResponse? movie;
+    private TimeSpan duration;
+
+    protected override async Task OnInitializedAsync()
+    {
+        movie = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{Id}");
+        if (movie is null)
+            NavManager.NavigateTo("/404");
+
+        duration = new TimeSpan(0, 0, (int)(movie!.Duration));
+    }
+}

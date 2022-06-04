@@ -1,6 +1,7 @@
 ﻿@page "/movies"
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
 @inject HttpClient Http
+@inject NavigationManager NavManager
 
 <PageTitle>Movies</PageTitle>
 
@@ -8,7 +9,7 @@
 
 <p>This component demonstrates fetching data from the server.</p>
 
-@if (movies == null)
+@if (movies is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -30,7 +31,8 @@ else
                     <td>@movie.Name</td>
                     <td>@movie.Description.Substring(0, Math.Min(150, movie.Description.Length))</td>
                     <td>@movie.Price</td>
-                    <td>@movie.Duration</td>
+                    <td>@(new TimeSpan(0, 0, (int)(movie.Duration)).TotalHours):@(new TimeSpan(0, 0, (int)(movie.Duration)).Minutes)</td>
+                    <td><button @onclick="@(e => ViewMovieDetails(movie.Id))">Details</button></td>
                 </tr>
             }
         </tbody>
@@ -39,6 +41,11 @@ else
 
 @code {
     private MovieResponse[]? movies;
+
+    protected void ViewMovieDetails(Guid id)
+    {
+        NavManager.NavigateTo($"/movie/{id}");
+    }
 
     protected override async Task OnInitializedAsync()
     {
