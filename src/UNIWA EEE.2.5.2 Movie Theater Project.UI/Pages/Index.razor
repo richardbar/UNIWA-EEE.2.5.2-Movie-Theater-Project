@@ -1,9 +1,46 @@
 ﻿@page "/"
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@inject HttpClient Http
+@inject NavigationManager NavManager
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (movies is null)
+{
+<p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row" data-masonry='{"percentPosition": true }'>
+        @foreach (var movie in movies)
+        {
+            <div class="col-sm-6 col-lg-4 mb-4">
+                <div class="card" @onclick="@(e => ViewMovieDetails(movie.Id))">
+                    <div class="card-body">
+                        <h5 class="card-title">@movie.Name</h5>
+                        <p class="card-text">@movie.Description</p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">Price: @movie.Price</small>
+                        <br />
+                        <small class="text-muted">Duration: @(new TimeSpan(0, 0, (int)(movie.Duration)).Hours):@(new TimeSpan(0, 0, (int)(movie.Duration)).Minutes):00</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
 
-Welcome to your new app.
+@code {
+    private MovieResponse[]? movies;
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    protected void ViewMovieDetails(Guid id)
+    {
+        NavManager.NavigateTo($"/movie/{id}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        movies = (await Http.GetFromJsonAsync<GetAllMoviesResponse>("api/movies")).Movies.ToArray();
+    }
+}
