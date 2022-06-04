@@ -7,8 +7,6 @@
 
 <h1>Movies</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
-
 @if (movie is null)
 {
     <p><em>Loading...</em></p>
@@ -16,7 +14,7 @@
 else
 {
     <div>
-    <h4>Attendee</h4>
+    <h4>@movie!.Name</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">Name</dt>
