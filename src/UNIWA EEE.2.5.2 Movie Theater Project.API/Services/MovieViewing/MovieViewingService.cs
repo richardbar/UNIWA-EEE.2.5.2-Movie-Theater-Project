@@ -57,6 +57,18 @@ public class MovieViewingService : IMovieViewingService
         return movieVewingrDtos.Select(movieVewingrDto => movieVewingrDto.ToMovieViewing());
     }
 
+    public async Task<IEnumerable<Domain.Entities.MovieViewing>> GetAllByMovieIdAsync(Guid id)
+    {
+        var movieViewingDtos = await _movieViewingRepository.GetAsyncByMovieId(id);
+        return movieViewingDtos.Select(movieVewingrDto => movieVewingrDto.ToMovieViewing());
+    }
+
+    public async Task<IEnumerable<Domain.Entities.MovieViewing>> GetAllByMovieTheaterIdAsync(Guid id)
+    {
+        var movieViewingDtos = await _movieViewingRepository.GetAsyncByMovieTheaterId(id);
+        return movieViewingDtos.Select(movieVewingrDto => movieVewingrDto.ToMovieViewing());
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         if ((await _reservationRepository.GetAsyncByMovieViewingId(id)).Count() != 0)

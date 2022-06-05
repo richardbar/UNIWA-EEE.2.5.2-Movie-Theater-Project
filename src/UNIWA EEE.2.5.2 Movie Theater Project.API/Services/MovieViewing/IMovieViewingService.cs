@@ -8,5 +8,9 @@ public interface IMovieViewingService
 
     Task<IEnumerable<Domain.Entities.MovieViewing>> GetAllAsync();
 
+    Task<IEnumerable<Domain.Entities.MovieViewing>> GetAllByMovieIdAsync(Guid id);
+
+    Task<IEnumerable<Domain.Entities.MovieViewing>> GetAllByMovieTheaterIdAsync(Guid id);
+
     Task<bool> DeleteAsync(Guid id);
 }
