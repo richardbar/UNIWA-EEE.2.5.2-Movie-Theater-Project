@@ -1,11 +1,13 @@
 ﻿@page "/movie/{Id:guid}"
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
 @inject HttpClient Http
 @inject NavigationManager NavManager
 
 <PageTitle>Movies</PageTitle>
 
-<h1>Movies</h1>
+<h1>Movie</h1>
 
 @if (movie is null)
 {
@@ -14,19 +16,53 @@
 else
 {
     <div>
-    <h4>@movie!.Name</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">Name</dt>
-        <dd class = "col-sm-10">@movie!.Name</dd>
-        <dt class = "col-sm-2">Description</dt>
-        <dd class = "col-sm-10">@movie!.Description</dd>
-        <dt class = "col-sm-2">Price</dt>
-        <dd class = "col-sm-10">@movie!.Price</dd>
-        <dt class = "col-sm-2">Duration</dt>
-        <dd class = "col-sm-10">@duration.Hours:@duration.Minutes:00</dd>
-    </dl>
-</div>
+        <h4>@movie!.Name</h4>
+        <hr />
+        <dl class="row">
+            <dt class = "col-sm-2">Name</dt>
+            <dd class = "col-sm-10">@movie!.Name</dd>
+            <dt class = "col-sm-2">Description</dt>
+            <dd class = "col-sm-10">@movie!.Description</dd>
+            <dt class = "col-sm-2">Price</dt>
+            <dd class = "col-sm-10">@movie!.Price</dd>
+            <dt class = "col-sm-2">Duration</dt>
+            <dd class = "col-sm-10">@duration.Hours:@duration.Minutes:00</dd>
+        </dl>
+    </div>
+
+    @if (movieViewings is not null && movieViewings.Length > 0)
+    {
+        <br />
+        <br />
+        <h1>Viewings</h1>
+        <table class="table">
+            <thead>
+                <th>Movie Theater Name</th>
+                <th>Movie Theater Dimensions</th>
+                <th>Start Time</th>
+            </thead>
+            <tbody>
+                @foreach (var movieViewing in (movieViewings ?? new MovieViewingResponse[0]))
+                {
+                    @if (movieTheaters[movieViewing.MovieTheaterId] is null)
+                    {
+                        continue;
+                    }
+                    <tr>
+                        <td>@movieTheaters[movieViewing.MovieTheaterId]!.Name</td>
+                        <td>@movieTheaters[movieViewing.MovieTheaterId]!.Rows x @movieTheaters[movieViewing.MovieTheaterId]!.Columns</td>
+                        <td>@(
+                        new TimeSpan(0, 0, (int)movieViewing.StartTime).Hours
+                        ):@(
+                              new TimeSpan(0, 0, (int)movieViewing.StartTime).Minutes
+                              ):@(
+                              new TimeSpan(0, 0, (int)movieViewing.StartTime).Seconds
+                              )</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 @code {
@@ -36,6 +72,9 @@ else
     private MovieResponse? movie;
     private TimeSpan duration;
 
+    private MovieViewingResponse[]? movieViewings;
+    private Dictionary<Guid, MovieTheaterResponse?> movieTheaters = new();
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -43,6 +82,13 @@ else
             movie = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{Id}");
             if (movie is null)
                 throw new Exception();
+
+            movieViewings = (await Http.GetFromJsonAsync<GetAllMovieViewingsResponse>($"api/movieviewings?MovieId={movie.Id}")).MovieViewings.ToArray();
+            foreach (var movieViewing in movieViewings)
+            {
+                if (!movieTheaters.ContainsKey(movieViewing.MovieTheaterId))
+                    movieTheaters[movieViewing.MovieTheaterId] = await Http.GetFromJsonAsync<MovieTheaterResponse>($"api/movietheaters/{movieViewing.MovieTheaterId}");
+            }
         }
         catch
         {
