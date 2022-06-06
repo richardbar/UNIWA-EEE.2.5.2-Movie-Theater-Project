@@ -8,5 +8,7 @@ public interface IReservationService
 
     Task<IEnumerable<Domain.Entities.Reservation>> GetAllAsync();
 
+    Task<IEnumerable<Domain.Entities.Reservation>> GetAllByMovieViewingIdAsync(Guid id);
+
     Task<bool> DeleteAsync(Guid id);
 }

@@ -41,6 +41,12 @@ public sealed class ReservationService : IReservationService
         return reservationDtos.Select(reservationDto => reservationDto.ToReservation());
     }
 
+    public async Task<IEnumerable<Domain.Entities.Reservation>> GetAllByMovieViewingIdAsync(Guid id)
+    {
+        var reservationDtos = await _reservationRepository.GetAsyncByMovieViewingId(id);
+        return reservationDtos.Select(reservationDto => reservationDto.ToReservation());
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         return await _reservationRepository.DeleteAsync(id);
