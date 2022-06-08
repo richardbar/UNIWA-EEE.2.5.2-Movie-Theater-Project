@@ -40,6 +40,7 @@ else
                 <th>Movie Theater Name</th>
                 <th>Movie Theater Dimensions</th>
                 <th>Start Time</th>
+                <th>Action</th>
             </thead>
             <tbody>
                 @foreach (var movieViewing in (movieViewings ?? new MovieViewingResponse[0]))
@@ -58,6 +59,7 @@ else
                               ):@(
                               new TimeSpan(0, 0, (int)movieViewing.StartTime).Seconds
                               )</td>
+                        <td><button type="button" class="btn btn-info" @onclick="(e) => ReserveSeats(movieViewing.Id)">Reserve seats</button></td>
                     </tr>
                 }
             </tbody>
@@ -74,6 +76,11 @@ else
 
     private MovieViewingResponse[]? movieViewings;
     private Dictionary<Guid, MovieTheaterResponse?> movieTheaters = new();
+
+    protected void ReserveSeats(Guid id)
+    {
+        NavManager.NavigateTo($"/reserve/{id}");
+    }
 
     protected override async Task OnInitializedAsync()
     {

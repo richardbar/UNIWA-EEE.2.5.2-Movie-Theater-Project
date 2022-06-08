@@ -1,0 +1,152 @@
+﻿@page "/reserve/{Id:guid}"
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
+@using MovieTheaterProject.Domain.Contracts.Responses.Reservation
+@using MovieTheaterProject.Domain.Entities
+@using System.Net.Http.Json
+@using System.Text
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
+@if (movie is null || movieTheater is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <p id="ReserveMovieId" hidden>@Id</p>
+        <p id="ReservePricePerSeat" hidden>@movie!.Price</p>
+        <h4>@movie!.Name</h4>
+        <hr />
+        <dl class="row">
+            <dt class = "col-sm-2">Name</dt>
+            <dd class = "col-sm-10">@movie!.Name</dd>
+            <dt class = "col-sm-2">Description</dt>
+            <dd class = "col-sm-10">@movie!.Description</dd>
+            <dt class = "col-sm-2">Price</dt>
+            <dd class = "col-sm-10">@movie!.Price</dd>
+            <dt class = "col-sm-2">Duration</dt>
+            <dd class = "col-sm-10">@duration.Hours:@duration.Minutes:00</dd>
+        </dl>
+    </div>
+
+    <br />
+    <br />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="container" id="ReserveSeats">
+                @for (ushort row = 0; row < movieTheater.Rows; row++)
+                {
+                    <div class="row">
+                        @for (ushort column = 0; column < movieTheater.Columns; column++)
+                        {
+                            <div class="@seatsClass[row, column]" onclick="SelectSeat(@row, @column)" id="ReserveSeat-@row-@column"></div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-footer">
+            <dl class="row">
+                <dt class = "col-sm-2">
+                    Number Of Seats:
+                </dt>
+                <dd class = "col-sm-10" id="ReserveNumberOfSeats">
+                    0
+                </dd>
+
+                <dt class = "col-sm-2">
+                    Price:
+                </dt>
+                <dd class = "col-sm-10" id="ReservePriceToPay">
+                    0
+                </dd>
+            </dl>
+
+            <br />
+
+            <div class="row">
+                <button class="btn btn-primary" style="width: 100%" onclick="ReserveSeats()">Reserve Seats</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private MovieViewingResponse? movieViewing;
+
+    private MovieResponse? movie;
+    private TimeSpan duration;
+    private MovieTheaterResponse? movieTheater;
+    private ReservationResponse[] reservations;
+
+    private string[,] seatsClass;
+
+    private ushort numberOfSeats = 1;
+    private ushort NumberOfSeats
+    {
+        get
+        {
+            return numberOfSeats;
+        }
+        set
+        {
+            if (value < 6 && 0 < value)
+                numberOfSeats = value;
+        }
+    }
+
+    private bool SeatReserved(ushort row, ushort column)
+    {
+        column += 1;
+        row += 1;
+
+        var str = new StringBuilder().Append(row).Append('-').Append(column).ToString();
+
+        foreach (var reservation in reservations)
+        {
+            if (reservation.SeatsSelected.Contains(str))
+                return true;
+        }
+
+        return false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            movieViewing = await Http.GetFromJsonAsync<MovieViewingResponse>($"api/movieviewings/{Id}");
+            if (movieViewing is null)
+                throw new Exception();
+
+            movie = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{movieViewing.MovieId}");
+            movieTheater = await Http.GetFromJsonAsync<MovieTheaterResponse>($"api/movietheaters/{movieViewing.MovieTheaterId}");
+            reservations = (await Http.GetFromJsonAsync<GetAllReservationsResponse>($"api/reservations?MovieViewingId={movieViewing.Id}")).Reservations.ToArray();
+            if (movie is null || movieTheater is null)
+                throw new Exception();
+
+            seatsClass = new string[movieTheater.Rows, movieTheater.Columns];
+            for (ushort row = 0; row < movieTheater.Rows; row++)
+            {
+                for (ushort column = 0; column < movieTheater.Columns; column++)
+                {
+                    seatsClass[row, column] = SeatReserved(row, column) ? "seat occupied" : "seat";
+                }
+            }
+
+            duration = new TimeSpan(0, 0, (int)movie.Duration);
+        }
+        catch
+        {
+            NavManager.NavigateTo("/404");
+        }
+    }
+}
