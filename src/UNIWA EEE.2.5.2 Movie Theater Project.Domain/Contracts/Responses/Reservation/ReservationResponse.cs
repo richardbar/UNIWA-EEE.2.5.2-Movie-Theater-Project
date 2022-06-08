@@ -6,7 +6,7 @@ public sealed class ReservationResponse
 
     public Guid MovieViewingId { get; init; } = default!;
 
-    public IEnumerable<string> SeatsSelected { get; init; } = default!;
+    public List<string> SeatsSelected { get; init; } = default!;
 
     public float PricePaid { get; init; } = default!;
 }
