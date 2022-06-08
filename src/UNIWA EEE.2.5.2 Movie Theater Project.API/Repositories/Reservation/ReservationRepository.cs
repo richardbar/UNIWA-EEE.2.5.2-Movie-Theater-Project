@@ -17,8 +17,8 @@ public sealed class ReservationRepository : IReservationRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
-            @"INSERT INTO Reservations (Id, MovieViewingId, Row, Column, SeatsSelected, PricePaid) 
-            VALUES (@Id, @MovieViewingId, @Row, @Column, @SeatsSelected, @PricePaid)",
+            @"INSERT INTO Reservations (Id, MovieViewingId, SeatsSelected, PricePaid) 
+            VALUES (@Id, @MovieViewingId, @SeatsSelected, @PricePaid)",
             reservation);
         return result > 0;
     }

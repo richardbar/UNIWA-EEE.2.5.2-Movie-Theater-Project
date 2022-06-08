@@ -8,9 +8,8 @@ public static class ApiContractToDomainMapper
         {
             Id = ReservationId.From(Guid.NewGuid()),
             MovieViewingId = MovieViewingId.From(Guid.Parse(request.MovieViewingId)),
-            Row = RowsColumns.From(request.Row),
-            Column = RowsColumns.From(request.Column),
-            SeatsSelected = RowsColumns.From(request.SeatsSelected)
+            SeatsSelected = request.SeatsSelected.Select(seatSelected =>
+                RowColumn.From(new KeyValuePair<ulong, ulong>(ulong.Parse(seatSelected.Split('-')[0]), ulong.Parse(seatSelected.Split('-')[1]))))
         };
     }
 

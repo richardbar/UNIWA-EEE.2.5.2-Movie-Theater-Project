@@ -8,9 +8,12 @@ public static class DtoToDomainMapper
         {
             Id = ReservationId.From(Guid.Parse(reservationDto.Id)),
             MovieViewingId = MovieViewingId.From(Guid.Parse(reservationDto.MovieViewingId)),
-            Row = RowsColumns.From(reservationDto.Row),
-            Column = RowsColumns.From(reservationDto.Column),
-            SeatsSelected = RowsColumns.From(reservationDto.SeatsSelected),
+            SeatsSelected = reservationDto.SeatsSelected.Split("--")
+                .Select(seatSelected =>
+                {
+                    var tokens = seatSelected.Split('-');
+                    return RowColumn.From(new KeyValuePair<ulong, ulong>(ulong.Parse(tokens[0]), ulong.Parse(tokens[1])));
+                }),
             PricePaid = Price.From(reservationDto.PricePaid)
         };
     }

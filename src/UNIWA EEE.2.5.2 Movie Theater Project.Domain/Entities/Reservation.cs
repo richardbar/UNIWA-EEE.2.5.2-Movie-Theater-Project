@@ -8,11 +8,7 @@ public class Reservation
 
     public MovieViewingId MovieViewingId { get; init; } = default!;
 
-    public RowsColumns Row { get; init; } = default!;
-
-    public RowsColumns Column { get; init; } = default!;
-
-    public RowsColumns SeatsSelected { get; init; } = default!;
+    public IEnumerable<RowColumn> SeatsSelected { get; init; } = default!;
 
     public Price PricePaid { get; set; } = default!;
 }

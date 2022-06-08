@@ -8,9 +8,8 @@ public static class DomainToApiContractMapper
         {
             Id = reservation.Id.Value,
             MovieViewingId = reservation.MovieViewingId.Value,
-            Row = reservation.Row.Value,
-            Column = reservation.Column.Value,
-            SeatsSelected = reservation.SeatsSelected.Value,
+            SeatsSelected = reservation.SeatsSelected.
+                Select(seatSelected => seatSelected.Value.Key.ToString() + "-" + seatSelected.Value.Value.ToString()),
             PricePaid = reservation.PricePaid.Value
         };
     }
@@ -23,9 +22,9 @@ public static class DomainToApiContractMapper
             {
                 Id = reservation.Id.Value,
                 MovieViewingId = reservation.MovieViewingId.Value,
-                Row = reservation.Row.Value,
-                Column = reservation.Column.Value,
-                SeatsSelected = reservation.SeatsSelected.Value
+                SeatsSelected = reservation.SeatsSelected.
+                    Select(seatSelected => seatSelected.Value.Key.ToString() + "-" + seatSelected.Value.Value.ToString()),
+                PricePaid = reservation.PricePaid.Value
             })
         };
     }

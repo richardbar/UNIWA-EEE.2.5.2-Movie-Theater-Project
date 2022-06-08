@@ -8,9 +8,11 @@ public static class DomainToDtoMapper
         {
             Id = reservation.Id.Value.ToString(),
             MovieViewingId = reservation.MovieViewingId.Value.ToString(),
-            Row = reservation.Row.Value,
-            Column = reservation.Column.Value,
-            SeatsSelected = reservation.SeatsSelected.Value,
+            SeatsSelected = string.Join("--", reservation.SeatsSelected
+                .Select(seatSelected =>
+                {
+                    return seatSelected.Value.Key.ToString() + '-' + seatSelected.Value.Value.ToString();
+                })),
             PricePaid = reservation.PricePaid.Value
         };
     }

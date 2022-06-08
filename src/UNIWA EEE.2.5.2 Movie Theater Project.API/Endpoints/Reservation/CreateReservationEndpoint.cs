@@ -24,7 +24,7 @@ public sealed class CreateReservationEndpoint : Endpoint<CreateReservationReques
         var movieViewing = await _movieViewingService.GetAsync(reservation.MovieViewingId.Value);
         var movie = await _movieService.GetAsync(movieViewing!.MovieId.Value);
 
-        reservation.PricePaid = Price.From(reservation.SeatsSelected.Value * movie!.Price.Value);
+        reservation.PricePaid = Price.From(reservation.SeatsSelected.Count() * movie!.Price.Value);
 
         await _reservationService.CreateAsync(reservation);
 
