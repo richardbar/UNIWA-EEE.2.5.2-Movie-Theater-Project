@@ -1,0 +1,8 @@
+﻿.container {
+    perspective: 1000px;
+    margin-bottom: 30px;
+}
+
+.row {
+    display: flex;
+}

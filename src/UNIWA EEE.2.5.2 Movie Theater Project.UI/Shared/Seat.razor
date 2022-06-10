@@ -1,0 +1,46 @@
+﻿<div class=@Classes @onclick="(e) => ToggleSelected()" id="@IdPrefix-@Row-@Column"></div>
+
+@code {
+    [Parameter]
+    public string IdPrefix { get; set; } = default!;
+
+    [Parameter]
+    public bool Reserved { get; set; } = false;
+
+    [Parameter]
+    public ushort Row { get; set; }
+
+    [Parameter]
+    public ushort Column { get; set; }
+
+    [Parameter]
+    public EventCallback<KeyValuePair<ulong, ulong>> OnSeatChange { get; set; }
+
+    private string _classes = "seat ";
+
+    protected string Classes
+    {
+        get
+        {
+            return (Reserved) ? "seat occupied" : _classes;
+        }
+
+        set
+        {
+            if (value == "occupied")
+                return;
+            if (value == "selected")
+                _classes = _classes.Split(' ')[0] + ' ' + value;
+            else
+                _classes = "seat ";
+
+            var t = OnSeatChange.InvokeAsync(new KeyValuePair<ulong, ulong>(Row, Column));
+            Task.WaitAll(t);
+        }
+    }
+
+    protected void ToggleSelected()
+    {
+        Classes = (Classes == "seat selected") ? "" : "selected";
+    }
+}

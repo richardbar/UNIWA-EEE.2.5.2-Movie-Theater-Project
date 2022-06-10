@@ -1,0 +1,40 @@
+﻿<div class="card">
+    <div class="card-body">
+        <div class="container" id="ReserveSeats">
+            @for (ushort row = 0; row < Rows; row++)
+            {
+                <div class="row">
+                    @for (ushort column = 0; column < Columns; column++)
+                    {
+                        <Seat IdPrefix=@IdPrefix Reserved=@Reserved[row, column] Row=@row Column=@column OnSeatChange=AlertSeatChange />
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid MovieViewingId { get; set; }
+
+    [Parameter]
+    public string IdPrefix { get; set;}
+
+    [Parameter]
+    public bool[,] Reserved { get; set; }
+
+    [Parameter]
+    public ushort Rows { get; set; }
+
+    [Parameter]
+    public ushort Columns { get; set; }
+
+    [Parameter]
+    public EventCallback<KeyValuePair<ulong, ulong>> OnSeatChange { get; set; }
+
+    protected void AlertSeatChange(KeyValuePair<ulong, ulong> RowColumn)
+    {
+        Task.WaitAll(OnSeatChange.InvokeAsync(RowColumn));
+    }
+}

@@ -1,9 +1,4 @@
-﻿.container {
-    perspective: 1000px;
-    margin-bottom: 30px;
-}
-
-.seat {
+﻿.seat {
     background-color: #444451;
     height: 12px;
     width: 15px;
@@ -23,8 +18,4 @@
 .seat:not(.occupied):hover {
     cursor: pointer;
     transform: scale(1.2);
-}
-
-.row {
-    display: flex;
 }

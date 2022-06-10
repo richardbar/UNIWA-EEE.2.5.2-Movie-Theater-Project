@@ -22,67 +22,6 @@
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
-    <script>
-        let seatsSelected = [];
-
-        function ReserveSeats() {
-            if (seatsSelected.length <= 0) {
-                // TODO: Show message
-                return;
-            }
-
-            movieId = $('#ReserveMovieId').text();
-
-            settings = {
-                'url': 'api/reservations',
-                'method': 'POST',
-                'timeout': 0,
-                'headers': {
-                    'Content-Type': 'application/json'
-                },
-                'data': JSON.stringify({
-                    'movieViewingId': movieId,
-                    'seatsSelected': seatsSelected
-                }),
-            };
-
-            $.ajax(settings).done(function (response) {
-                console.log(response);
-                location.reload();
-            });
-        }
-
-        function SelectSeat(row, column) {
-            row = parseInt(row);
-            column = parseInt(column);
-
-            if ($('#ReserveSeat-' + row + '-' + column).hasClass('occupied'))
-                return;
-
-
-            numberOfSeats = parseInt($('#ReserveNumberOfSeats').text());
-
-            pricePerSeat = parseFloat($('#ReservePricePerSeat').text());
-
-            if (!$('#ReserveSeat-' + row + '-' + column).hasClass('selected')) {
-                if (numberOfSeats < 4) {
-                    seatsSelected.push((row + 1) + '-' + (column + 1));
-                    $('#ReserveSeat-' + row + '-' + column).addClass('selected');
-                    numberOfSeats++;
-                }
-                else {
-                    // TODO: Show message
-                }
-            } else {
-                seatsSelected.splice(seatsSelected.indexOf((row + 1) + '-' + (column + 1)), 1);
-                $('#ReserveSeat-' + row + '-' + column).removeClass('selected');
-                numberOfSeats--;
-            }
-
-            $('#ReserveNumberOfSeats').text(numberOfSeats);
-            $('#ReservePriceToPay').text(Math.round((numberOfSeats * pricePerSeat + Number.EPSILON) * 100) / 100);
-        }
-    </script>
 </body>
 
 </html>

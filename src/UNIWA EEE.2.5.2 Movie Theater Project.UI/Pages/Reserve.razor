@@ -35,44 +35,31 @@ else
     <br />
     <br />
 
-    <div class="card">
-        <div class="card-body">
-            <div class="container" id="ReserveSeats">
-                @for (ushort row = 0; row < movieTheater.Rows; row++)
-                {
-                    <div class="row">
-                        @for (ushort column = 0; column < movieTheater.Columns; column++)
-                        {
-                            <div class="@seatsClass[row, column]" onclick="SelectSeat(@row, @column)" id="ReserveSeat-@row-@column"></div>
-                        }
-                    </div>
-                }
-            </div>
+    <MovieViewing MovieViewingId=@movieViewing!.Id IdPrefix="ReserveSeat" Reserved=@reserved Rows=@movieTheater.Rows Columns=@movieTheater.Columns OnSeatChange="(rowColumn) => Console.WriteLine(rowColumn.Key.ToString() + ' ' + rowColumn.Value.ToString())"/> 
+
+    <footer class="mt-auto">
+        <dl class="row">
+            <dt class = "col-sm-2">
+                Number Of Seats:
+            </dt>
+            <dd class = "col-sm-10" id="ReserveNumberOfSeats">
+                0
+            </dd>
+
+            <dt class = "col-sm-2">
+                Price:
+            </dt>
+            <dd class = "col-sm-10" id="ReservePriceToPay">
+                0
+            </dd>
+        </dl>
+
+        <br />
+
+        <div class="row">
+            <button class="btn btn-primary" style="width: 100%" onclick="ReserveSeats()">Reserve Seats</button>
         </div>
-        <div class="card-footer">
-            <dl class="row">
-                <dt class = "col-sm-2">
-                    Number Of Seats:
-                </dt>
-                <dd class = "col-sm-10" id="ReserveNumberOfSeats">
-                    0
-                </dd>
-
-                <dt class = "col-sm-2">
-                    Price:
-                </dt>
-                <dd class = "col-sm-10" id="ReservePriceToPay">
-                    0
-                </dd>
-            </dl>
-
-            <br />
-
-            <div class="row">
-                <button class="btn btn-primary" style="width: 100%" onclick="ReserveSeats()">Reserve Seats</button>
-            </div>
-        </div>
-    </div>
+    </footer>
 }
 
 @code
@@ -87,7 +74,7 @@ else
     private MovieTheaterResponse? movieTheater;
     private ReservationResponse[] reservations;
 
-    private string[,] seatsClass;
+    private bool[,] reserved;
 
     private ushort numberOfSeats = 1;
     private ushort NumberOfSeats
@@ -133,12 +120,12 @@ else
             if (movie is null || movieTheater is null)
                 throw new Exception();
 
-            seatsClass = new string[movieTheater.Rows, movieTheater.Columns];
+            reserved = new bool[movieTheater.Rows, movieTheater.Columns];
             for (ushort row = 0; row < movieTheater.Rows; row++)
             {
                 for (ushort column = 0; column < movieTheater.Columns; column++)
                 {
-                    seatsClass[row, column] = SeatReserved(row, column) ? "seat occupied" : "seat";
+                    reserved[row, column] = SeatReserved(row, column);
                 }
             }
 
