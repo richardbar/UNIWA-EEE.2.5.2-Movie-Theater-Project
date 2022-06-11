@@ -1,0 +1,191 @@
+﻿@page "/reservation/{Id:guid?}"
+@using System.Net.Http.Json
+@using System.Text
+
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
+@using MovieTheaterProject.Domain.Contracts.Responses.Reservation
+@using MovieTheaterProject.Domain.Entities
+
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager NavManager
+
+@if (Id is null)
+{
+    <form>
+        <div class="form-group">
+            <label for="reservationIdInput">Reservation Id</label>
+            <input type="text" class="form-control" id="reservationIdInput" aria-describedby="reservation Id Input" placeholder="Reservation Id Input" @bind="_idInputValue">
+            <small id="reservationIdInputHelp" class="form-text text-muted">Input the reservation Id that you received when making a recervation.</small>
+        </div>
+        <br />
+        <button type="submit" class="btn btn-primary" @onclick="HandleLoadReservationButtonClicked">Load Reservation</button>
+    </form>
+}
+else if (_dataLoaded)
+{
+    <div>
+        <div class="row">
+            <div class="col-lg-10">
+                <h4>@_movie.Name</h4>
+            </div>
+            <div class="col-lg-2">
+                <button class="btn btn-link @_printCssClass" @onclick="HandlePrintButtonClicked">Print</button>
+            </div>
+        </div>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-4">Reservation ID (Keep this for future use)</dt>
+            <dd class="col-sm-8">@Id</dd>
+            <dt class="col-sm-4">Name</dt>
+            <dd class="col-sm-8">@_movie.Name</dd>
+            <dt class="col-sm-4">Movie Theater Name</dt>
+            <dd class="col-sm-8">@_movieTheater.Name</dd>
+            <dt class="col-sm-4">Start Time</dt>
+            <dd class="col-sm-8">@_movieStartTime.Hours:@_movieStartTime.Minutes:00</dd>
+            <dt class="col-sm-4">Duration</dt>
+            <dd class="col-sm-8">@_movieDuration.Hours:@_movieDuration.Minutes:00</dd>
+            <dt class="col-sm-4">Seats Selected</dt>
+            <dd class="col-sm-8">
+                @foreach (var seat in _reservation.SeatsSelected)
+                {
+                    var tokens = seat.Split('-');
+                    var row = ushort.Parse(tokens[0]);
+                    var column = ushort.Parse(tokens[1]);
+
+                    <p>@row:@column</p>
+                }
+            </dd>
+            <dt class="col-sm-4">Price paid</dt>
+            <dd class="col-sm-8">@Math.Round(_reservation.PricePaid, 2)</dd>
+        </dl>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+    private string? _idInputValue { get; set; }
+
+    private bool _dataLoaded = false;
+
+    private ReservationResponse _reservation;
+    private MovieViewingResponse _movieViewing;
+    private MovieResponse _movie;
+    private MovieTheaterResponse _movieTheater;
+
+    private TimeSpan _movieDuration;
+    private TimeSpan _movieStartTime;
+
+    private bool _collapsePrintButton = false;
+    private string? _printCssClass => _collapsePrintButton ? "collapse" : null;
+
+    private async Task LoadReservationDataAsync()
+    {
+        if (Id is null)
+            return;
+
+        var reservation = await Http.GetFromJsonAsync<ReservationResponse>($"api/reservations/{Id}");
+        if (reservation is null)
+            throw new Exception();
+
+        _reservation = reservation;
+    }
+
+    private async Task LoadMovieViewingDataAsync()
+    {
+        if (_reservation is null)
+            throw new Exception();
+
+        var movieViewing = await Http.GetFromJsonAsync<MovieViewingResponse>($"api/movieviewings/{_reservation.MovieViewingId}");
+        if (movieViewing is null)
+            throw new Exception();
+
+        _movieViewing = movieViewing;
+        _movieStartTime = new(0, 0, (int)_movieViewing.StartTime);
+    }
+
+    private async Task LoadMovieDataAsync()
+    {
+        if (_movieViewing is null)
+            throw new Exception();
+
+        var movie = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{_movieViewing.MovieId}");
+        if (movie is null)
+            throw new Exception();
+
+        _movie = movie;
+        _movieDuration = new(0, 0, (int)_movie.Duration);
+    }
+
+    private async Task LoadMovieTheaterDataAsync()
+    {
+        if (_movieViewing is null)
+            throw new Exception();
+
+        var movieTheater = await Http.GetFromJsonAsync<MovieTheaterResponse>($"api/movietheaters/{_movieViewing.MovieTheaterId}");
+        if (movieTheater is null)
+            throw new Exception();
+
+        _movieTheater = movieTheater;
+    }
+
+    protected async Task HandleLoadReservationButtonClicked()
+    {
+        var parsed = Guid.TryParse(_idInputValue, out var id);
+        if (!parsed)
+            return;
+        Id = id;
+
+        await LoadDataAsync();
+    }
+
+    protected async Task HandlePrintButtonClicked()
+    {
+        _collapsePrintButton = true;
+
+        var toggledNavMenu = false;
+        if (NavMenu.collapseNavMenu)
+        {
+            toggledNavMenu = true;
+            NavMenu.ToggleNavMenu();
+        }
+
+        await Task.Delay(100);
+
+        await JS.InvokeVoidAsync("window.print");
+
+        if (toggledNavMenu)
+            NavMenu.ToggleNavMenu();
+
+        _collapsePrintButton = false;
+    }
+
+    protected async Task LoadDataAsync()
+    {
+        try
+        {
+            await LoadReservationDataAsync();
+            await LoadMovieViewingDataAsync();
+            await LoadMovieDataAsync();
+            await LoadMovieTheaterDataAsync();
+
+            _dataLoaded = true;
+        }
+        catch
+        {
+            Id = null;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id is null)
+            return;
+
+        await LoadDataAsync();
+    }
+
+}

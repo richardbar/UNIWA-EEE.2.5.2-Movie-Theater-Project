@@ -131,6 +131,8 @@ else
         using var response = await Http.PostAsJsonAsync("api/reservations", createReservationRequest);
 
         var reservation = await response.Content.ReadFromJsonAsync<ReservationResponse>();
+        
+        NavManager.NavigateTo($"/reservation/{reservation!.Id}");
     }
 
     private bool SeatReserved(ushort row, ushort column)
