@@ -10,38 +10,38 @@
 @inject HttpClient Http
 @inject NavigationManager NavManager
 
-@if (movie is null || movieTheater is null)
+@if (!_dataLoaded)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    @if (alert is not null)
+    @if (_alertVisible == true)
     {
-        <Alert Text="Cannot select more than 4 seats" Type="danger" OnClose="() => alert = null" />
+        <Alert Text="Cannot select more than 4 seats" Type="danger" OnClose="() => _alertVisible = false" />
     }
 
     <div>
         <p id="ReserveMovieId" hidden>@Id</p>
-        <p id="ReservePricePerSeat" hidden>@movie!.Price</p>
-        <h4>@movie!.Name</h4>
+        <p id="ReservePricePerSeat" hidden>@_movie.Price</p>
+        <h4>@_movie.Name</h4>
         <hr />
         <dl class="row">
             <dt class = "col-sm-2">Name</dt>
-            <dd class = "col-sm-10">@movie!.Name</dd>
+            <dd class = "col-sm-10">@_movie.Name</dd>
             <dt class = "col-sm-2">Description</dt>
-            <dd class = "col-sm-10">@movie!.Description</dd>
+            <dd class = "col-sm-10">@_movie.Description</dd>
             <dt class = "col-sm-2">Price</dt>
-            <dd class = "col-sm-10">@movie!.Price</dd>
+            <dd class = "col-sm-10">@_movie.Price</dd>
             <dt class = "col-sm-2">Duration</dt>
-            <dd class = "col-sm-10">@duration.Hours:@duration.Minutes:00</dd>
+            <dd class = "col-sm-10">@_movieDuration.Hours:@_movieDuration.Minutes:00</dd>
         </dl>
     </div>
 
     <br />
     <br />
 
-    <MovieViewing MovieViewingId=@movieViewing!.Id IdPrefix="ReserveSeat" Reserved=@reserved Rows=@movieTheater.Rows Columns=@movieTheater.Columns OnSeatChange="HandleOnSeatChange" /> 
+    <MovieViewing MovieViewingId=@_movieViewing.Id IdPrefix="ReserveSeat" Reserved=@_reservedSeats Rows=@_movieTheater.Rows Columns=@_movieTheater.Columns OnSeatChange="HandleOnSeatChange" /> 
 
     <br />
     <br />
@@ -52,14 +52,14 @@ else
                 Number Of Seats:
             </dt>
             <dd class = "col-sm-10">
-                @NumberOfSeats
+                @_numberOfSeats
             </dd>
 
             <dt class = "col-sm-2">
                 Price:
             </dt>
             <dd class = "col-sm-10">
-                @PriceToPay
+                @_priceToPay
             </dd>
         </dl>
 
@@ -76,27 +76,27 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    private MovieViewingResponse? movieViewing;
+    private bool _dataLoaded = false;
+    private bool _alertVisible = false;
 
-    private MovieResponse? movie;
-    private TimeSpan duration;
-    private MovieTheaterResponse? movieTheater;
-    private ReservationResponse[] reservations;
+    private MovieViewingResponse _movieViewing;
+    private MovieResponse _movie;
+    private MovieTheaterResponse _movieTheater;
+    private ReservationResponse[] _reservations;
 
-    private bool[,] reserved;
+    private TimeSpan _movieDuration;
 
-    private int NumberOfSeats { get; set; }
-    private double PriceToPay
+    private bool[,] _reservedSeats;
+
+    private List<string> _seatsReserved = new();
+    private int _numberOfSeats { get; set; }
+    private double _priceToPay
     {
         get
         {
-            return Math.Round(NumberOfSeats * movie!.Price, 2);
+            return Math.Round(_numberOfSeats * _movie!.Price, 2);
         }
     }
-
-    private List<string> seatsReserved = new();
-    private ushort NumberOfSeatsReserved = 0;
-    private object? alert = null;
 
     private void HandleOnSeatChange(KeyValuePair<ushort, ushort> rowColumn)
     {
@@ -104,40 +104,33 @@ else
         var column = rowColumn.Value + 1;
 
         var seat = new StringBuilder().Append(row).Append('-').Append(column).ToString();
-        Console.WriteLine(seat);
-        if (seatsReserved.Contains(seat))
-        {
-            Console.WriteLine("Seat to be removed");
-            seatsReserved.Remove(seat);
-        }
+        if (_seatsReserved.Contains(seat))
+            _seatsReserved.Remove(seat);
         else
-        {
-            Console.WriteLine("Seat to be added");
-            seatsReserved.Add(seat);
-        }
+            _seatsReserved.Add(seat);
 
-        NumberOfSeats = seatsReserved.Count;
+        _numberOfSeats = _seatsReserved.Count;
 
-        if (4 < NumberOfSeats)
-            alert = new();
+        _alertVisible = (4 < _numberOfSeats);
     }
 
     private async Task HandleReserveSeatsButtonClicked()
     {
-        if (4 < seatsReserved.Count)
+        if (4 < _seatsReserved.Count)
+        {
+            _alertVisible = true;
             return;
+        }
 
         var createReservationRequest = new CreateReservationRequest()
         {
-            MovieViewingId = movieViewing!.Id.ToString(),
-            SeatsSelected = seatsReserved
+            MovieViewingId = _movieViewing.Id.ToString(),
+            SeatsSelected = _seatsReserved
         };
 
         using var response = await Http.PostAsJsonAsync("api/reservations", createReservationRequest);
 
         var reservation = await response.Content.ReadFromJsonAsync<ReservationResponse>();
-
-        Console.WriteLine($"Reservation ID: {reservation!.Id}\nReservation Price: {reservation!.PricePaid}");
     }
 
     private bool SeatReserved(ushort row, ushort column)
@@ -147,7 +140,7 @@ else
 
         var str = new StringBuilder().Append(row).Append('-').Append(column).ToString();
 
-        foreach (var reservation in reservations)
+        foreach (var reservation in _reservations)
         {
             if (reservation.SeatsSelected.Contains(str))
                 return true;
@@ -156,30 +149,70 @@ else
         return false;
     }
 
+    private async Task LoadMovieViewingData()
+    {
+        var movieViewingTmp = await Http.GetFromJsonAsync<MovieViewingResponse>($"api/movieviewings/{Id}");
+        if (movieViewingTmp is null)
+            throw new Exception();
+
+        _movieViewing = movieViewingTmp;
+    }
+
+    private async Task LoadMovieData()
+    {
+        if (_movieViewing is null)
+            throw new Exception();
+
+        var movieTmp = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{_movieViewing.MovieId}");
+        if (movieTmp is null)
+            throw new Exception();
+
+        _movie = movieTmp;
+        _movieDuration = new TimeSpan(0, 0, (int)_movie.Duration);
+    }
+
+    private async Task LoadMovieTheaterData()
+    {
+        if (_movieViewing is null)
+            throw new Exception();
+
+        var movieTheaterTmp = await Http.GetFromJsonAsync<MovieTheaterResponse>($"api/movietheaters/{_movieViewing.MovieTheaterId}");
+        if (movieTheaterTmp is null)
+            throw new Exception();
+
+        _movieTheater = movieTheaterTmp;
+    }
+
+    private async Task LoadReservationsData()
+    {
+        if (_movieViewing is null)
+            throw new Exception();
+
+        var reservationsTmp = await Http.GetFromJsonAsync<GetAllReservationsResponse>($"api/reservations?MovieViewingId={_movieViewing.Id}");
+        if (reservationsTmp is null)
+            throw new Exception();
+
+        var reservationArrayTmp = reservationsTmp.Reservations.ToArray();
+        _reservations = reservationArrayTmp;
+
+        _reservedSeats = new bool[_movieTheater.Rows, _movieTheater.Columns];
+        for (ushort row = 0; row < _movieTheater.Rows; row++)
+        {
+            for (ushort column = 0; column < _movieTheater.Columns; column++)
+                _reservedSeats[row, column] = SeatReserved(row, column);
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            movieViewing = await Http.GetFromJsonAsync<MovieViewingResponse>($"api/movieviewings/{Id}");
-            if (movieViewing is null)
-                throw new Exception();
+            await LoadMovieViewingData();
+            await LoadMovieData();
+            await LoadMovieTheaterData();
+            await LoadReservationsData();
 
-            movie = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{movieViewing.MovieId}");
-            movieTheater = await Http.GetFromJsonAsync<MovieTheaterResponse>($"api/movietheaters/{movieViewing.MovieTheaterId}");
-            reservations = (await Http.GetFromJsonAsync<GetAllReservationsResponse>($"api/reservations?MovieViewingId={movieViewing.Id}")).Reservations.ToArray();
-            if (movie is null || movieTheater is null)
-                throw new Exception();
-
-            reserved = new bool[movieTheater.Rows, movieTheater.Columns];
-            for (ushort row = 0; row < movieTheater.Rows; row++)
-            {
-                for (ushort column = 0; column < movieTheater.Columns; column++)
-                {
-                    reserved[row, column] = SeatReserved(row, column);
-                }
-            }
-
-            duration = new TimeSpan(0, 0, (int)movie.Duration);
+            _dataLoaded = true;
         }
         catch
         {
