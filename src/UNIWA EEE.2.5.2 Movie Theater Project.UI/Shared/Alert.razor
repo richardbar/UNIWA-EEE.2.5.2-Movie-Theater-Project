@@ -1,0 +1,15 @@
+﻿<div class="alert alert-@Type alert-dismissible alert-custom">
+    <a class="close" data-dismiss="alert" aria-label="close" @onclick="(e) => Task.WaitAll(OnClose.InvokeAsync())">&times;</a>
+    @Text
+</div>
+
+@code {
+    [Parameter]
+    public string Text { get; set; } = "";
+
+    [Parameter]
+    public string Type { get; set; } = "success";
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+}

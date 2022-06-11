@@ -3,6 +3,7 @@
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
 @using MovieTheaterProject.Domain.Contracts.Responses.Reservation
+@using MovieTheaterProject.Domain.Contracts.Requests.Reservation
 @using MovieTheaterProject.Domain.Entities
 @using System.Net.Http.Json
 @using System.Text
@@ -15,6 +16,11 @@
 }
 else
 {
+    @if (alert is not null)
+    {
+        <Alert Text="Cannot select more than 4 seats" Type="danger" OnClose="() => alert = null" />
+    }
+
     <div>
         <p id="ReserveMovieId" hidden>@Id</p>
         <p id="ReservePricePerSeat" hidden>@movie!.Price</p>
@@ -35,29 +41,32 @@ else
     <br />
     <br />
 
-    <MovieViewing MovieViewingId=@movieViewing!.Id IdPrefix="ReserveSeat" Reserved=@reserved Rows=@movieTheater.Rows Columns=@movieTheater.Columns OnSeatChange="(rowColumn) => Console.WriteLine(rowColumn.Key.ToString() + ' ' + rowColumn.Value.ToString())"/> 
+    <MovieViewing MovieViewingId=@movieViewing!.Id IdPrefix="ReserveSeat" Reserved=@reserved Rows=@movieTheater.Rows Columns=@movieTheater.Columns OnSeatChange="HandleOnSeatChange" /> 
+
+    <br />
+    <br />
 
     <footer class="mt-auto">
         <dl class="row">
             <dt class = "col-sm-2">
                 Number Of Seats:
             </dt>
-            <dd class = "col-sm-10" id="ReserveNumberOfSeats">
-                0
+            <dd class = "col-sm-10">
+                @NumberOfSeats
             </dd>
 
             <dt class = "col-sm-2">
                 Price:
             </dt>
-            <dd class = "col-sm-10" id="ReservePriceToPay">
-                0
+            <dd class = "col-sm-10">
+                @PriceToPay
             </dd>
         </dl>
 
         <br />
 
         <div class="row">
-            <button class="btn btn-primary" style="width: 100%" onclick="ReserveSeats()">Reserve Seats</button>
+            <button class="btn btn-primary" style="width: 100%" @onclick="HandleReserveSeatsButtonClicked">Reserve Seats</button>
         </div>
     </footer>
 }
@@ -76,18 +85,59 @@ else
 
     private bool[,] reserved;
 
-    private ushort numberOfSeats = 1;
-    private ushort NumberOfSeats
+    private int NumberOfSeats { get; set; }
+    private double PriceToPay
     {
         get
         {
-            return numberOfSeats;
+            return Math.Round(NumberOfSeats * movie!.Price, 2);
         }
-        set
+    }
+
+    private List<string> seatsReserved = new();
+    private ushort NumberOfSeatsReserved = 0;
+    private object? alert = null;
+
+    private void HandleOnSeatChange(KeyValuePair<ushort, ushort> rowColumn)
+    {
+        var row = rowColumn.Key + 1;
+        var column = rowColumn.Value + 1;
+
+        var seat = new StringBuilder().Append(row).Append('-').Append(column).ToString();
+        Console.WriteLine(seat);
+        if (seatsReserved.Contains(seat))
         {
-            if (value < 6 && 0 < value)
-                numberOfSeats = value;
+            Console.WriteLine("Seat to be removed");
+            seatsReserved.Remove(seat);
         }
+        else
+        {
+            Console.WriteLine("Seat to be added");
+            seatsReserved.Add(seat);
+        }
+
+        NumberOfSeats = seatsReserved.Count;
+
+        if (4 < NumberOfSeats)
+            alert = new();
+    }
+
+    private async Task HandleReserveSeatsButtonClicked()
+    {
+        if (4 < seatsReserved.Count)
+            return;
+
+        var createReservationRequest = new CreateReservationRequest()
+        {
+            MovieViewingId = movieViewing!.Id.ToString(),
+            SeatsSelected = seatsReserved
+        };
+
+        using var response = await Http.PostAsJsonAsync("api/reservations", createReservationRequest);
+
+        var reservation = await response.Content.ReadFromJsonAsync<ReservationResponse>();
+
+        Console.WriteLine($"Reservation ID: {reservation!.Id}\nReservation Price: {reservation!.PricePaid}");
     }
 
     private bool SeatReserved(ushort row, ushort column)

@@ -31,9 +31,9 @@
     public ushort Columns { get; set; }
 
     [Parameter]
-    public EventCallback<KeyValuePair<ulong, ulong>> OnSeatChange { get; set; }
+    public EventCallback<KeyValuePair<ushort, ushort>> OnSeatChange { get; set; }
 
-    protected void AlertSeatChange(KeyValuePair<ulong, ulong> RowColumn)
+    protected void AlertSeatChange(KeyValuePair<ushort, ushort> RowColumn)
     {
         Task.WaitAll(OnSeatChange.InvokeAsync(RowColumn));
     }

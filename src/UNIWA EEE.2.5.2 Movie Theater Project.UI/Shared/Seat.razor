@@ -14,7 +14,7 @@
     public ushort Column { get; set; }
 
     [Parameter]
-    public EventCallback<KeyValuePair<ulong, ulong>> OnSeatChange { get; set; }
+    public EventCallback<KeyValuePair<ushort, ushort>> OnSeatChange { get; set; }
 
     private string _classes = "seat ";
 
@@ -34,7 +34,7 @@
             else
                 _classes = "seat ";
 
-            var t = OnSeatChange.InvokeAsync(new KeyValuePair<ulong, ulong>(Row, Column));
+            var t = OnSeatChange.InvokeAsync(new KeyValuePair<ushort, ushort>(Row, Column));
             Task.WaitAll(t);
         }
     }
