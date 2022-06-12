@@ -1,0 +1,248 @@
+﻿@page "/createmovie"
+@using MovieTheaterProject.Domain
+@using MovieTheaterProject.Domain.Contracts.Requests.Movie
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
+<h3>Create Movie</h3>
+
+<div class="container">
+    <form class="row" novalidate>
+        <div class="col-md-12">
+            <label for="createMovieName" class="form-label">Movie Name</label>
+            <input type="text" class="form-control @(_movieNameInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieName placeholder="Enter Movie's Name" required />
+            @if (_movieNameInvalidErrorsFound)
+            {
+                <div class="invalid-feedback">
+                    @foreach (var validationError in _movieNameInvalidErrors)
+                    {
+                        @validationError
+                    }
+                </div>
+            }
+        </div>
+
+        <br />
+
+        <div class="col-md-12">
+            <label for="createMovieDescription" class="form-label">Movie Description</label>
+            <textarea type="text" class="form-control @(_movieDescriptionInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieDescription placeholder="Enter Movie's Description" required rows="5" />
+            @if (_movieDescriptionInvalidErrorsFound)
+            {
+                <div class="invalid-feedback">
+                    @foreach (var validationError in _movieDescriptionInvalidErrors)
+                    {
+                        @validationError
+                    }
+                </div>
+            }
+        </div>
+
+        <br />
+
+        <div class="col-md-12">
+            <label for="createMoviePrice" class="form-label">Movie Price</label>
+            <input type="number" class="form-control @(_moviePriceInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MoviePrice placeholder="Enter Movie's Price" required />
+            @if (_moviePriceInvalidErrorsFound)
+            {
+                <div class="invalid-feedback">
+                    @foreach (var validationError in _moviePriceInvalidErrors)
+                    {
+                        @validationError
+                    }
+                </div>
+            }
+        </div>
+
+        <br />
+
+        <div class="col-md-12">
+            <label for="createMovieDurationHour" class="form-label">Movie Duration</label>
+            <div class="input-group">
+                <input type="number" class="form-control @(_movieDurationInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieDurationHour placeholder="Hour" required />
+                <input type="number" class="form-control @(_movieDurationInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieDurationMinute placeholder="Minute" required />
+                @if (_movieDurationInvalidErrorsFound)
+                {
+                    <div class="invalid-feedback">
+                        @foreach (var validationError in _movieDurationInvalidErrors)
+                        {
+                            @validationError
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <br />
+
+        <div class="col-12">
+            <button class="btn btn-primary" @onclick="HandleCreateMovieButtonClicked">Create Movie</button>
+        </div>
+    </form>
+</div>
+
+@code {
+    private string? _movieName;
+    private string? _movieDescription;
+    private float _moviePrice = (float)Math.Round(.0d, 2);
+    private long _movieDuration = (long)Constants.MovieMinimumDuration.TotalSeconds;
+
+    private bool _movieNameInvalidErrorsFound = true;
+    private bool _movieDescriptionInvalidErrorsFound = true;
+    private bool _moviePriceInvalidErrorsFound = false;
+    private bool _movieDurationInvalidErrorsFound = false;
+
+    private List<string> _movieNameInvalidErrors = new();
+    private List<string> _movieDescriptionInvalidErrors = new();
+    private List<string> _moviePriceInvalidErrors = new();
+    private List<string> _movieDurationInvalidErrors = new();
+
+    private string? MovieName
+    {
+        get
+        {
+            return _movieName;
+        }
+        set
+        {
+            _movieNameInvalidErrors.Clear();
+
+            if (value is null || value.Length == 0)
+                _movieNameInvalidErrors.Add("Movie Name is required");
+
+            if (Constants.MovieNameMaxLength < value?.Length)
+                _movieNameInvalidErrors.Add($"Movie Name cannot exceed {Constants.MovieNameMaxLength} characters");
+
+            _movieNameInvalidErrorsFound = _movieNameInvalidErrors.Count() != 0;
+
+            _movieName = value;
+        }
+    }
+
+    private string? MovieDescription
+    {
+        get
+        {
+            return _movieDescription;
+        }
+        set
+        {
+            _movieDescriptionInvalidErrors.Clear();
+
+            if (value is null || value.Length == 0)
+                _movieDescriptionInvalidErrors.Add("Movie Description is required");
+
+            if (Constants.MovieDescriptMaxLength < value?.Length)
+                _movieDescriptionInvalidErrors.Add($"Movie Description cannot exceed {Constants.MovieDescriptMaxLength} characters");
+
+            _movieDescriptionInvalidErrorsFound = _movieDescriptionInvalidErrors.Count() != 0;
+
+            _movieDescription = value;
+        }
+    }
+
+    private float MoviePrice
+    {
+        get
+        {
+            return _moviePrice;
+        }
+        set
+        {
+            _moviePriceInvalidErrors.Clear();
+
+            if (value < .0f)
+                _moviePriceInvalidErrors.Add("Movie Price cannot be negative");
+
+            _moviePriceInvalidErrorsFound = _moviePriceInvalidErrors.Count() != 0;
+
+            _moviePrice = (float)Math.Round(value, 2);
+        }
+    }
+
+    private ulong MovieDurationHour
+    {
+        get
+        {
+            return (ulong)(new TimeSpan(0, 0, (int)_movieDuration).Hours);
+        }
+        set
+        {
+            _movieDurationInvalidErrors.Clear();
+
+            if (value < .0f)
+                _movieDurationInvalidErrors.Add("Movie Hour cannot be negative");
+
+            var duration = new TimeSpan((int)value, (int)MovieDurationMinute, 0);
+            if (duration < Constants.MovieMinimumDuration)
+                _movieDurationInvalidErrors.Add($"Movie minimum duration is {Constants.MovieMinimumDuration.Hours}:{Constants.MovieMinimumDuration.Minutes}:00");
+            if (Constants.MovieMaximumDuration < duration)
+                _movieDurationInvalidErrors.Add($"Movie maximum duration is {Constants.MovieMaximumDuration.Hours}:{Constants.MovieMaximumDuration.Minutes}:00");
+
+            _movieDurationInvalidErrorsFound = _movieDurationInvalidErrors.Count() != 0;
+
+            _movieDuration = (long)(duration.TotalSeconds);
+
+            Console.WriteLine(_movieDuration);
+        }
+    }
+
+    private ulong MovieDurationMinute
+    {
+        get
+        {
+            return (ulong)(new TimeSpan(0, 0, (int)_movieDuration).Minutes);
+        }
+        set
+        {
+            _movieDurationInvalidErrors.Clear();
+
+            if (value < 0)
+                _movieDurationInvalidErrors.Add("Movie Minute cannot be negative");
+
+            if (60 < value)
+                _movieDurationInvalidErrors.Add("Movie Minute cannot exceed 60");
+
+            var duration = new TimeSpan((int)MovieDurationHour, (int)value, 0);
+            if (duration < Constants.MovieMinimumDuration)
+                _movieDurationInvalidErrors.Add($"Movie minimum duration is {Constants.MovieMinimumDuration.Hours}:{Constants.MovieMinimumDuration.Minutes}:00");
+            if (Constants.MovieMaximumDuration < duration)
+                _movieDurationInvalidErrors.Add($"Movie maximum duration is {Constants.MovieMaximumDuration.Hours}:{Constants.MovieMaximumDuration.Minutes}:00");
+
+            _movieDurationInvalidErrorsFound = _movieDurationInvalidErrors.Count() != 0;
+
+            _movieDuration = (long)(duration.TotalSeconds);
+
+            Console.WriteLine(_movieDuration);
+        }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        _movieNameInvalidErrors.Add("Movie Name is required");
+        _movieDescriptionInvalidErrors.Add("Movie Description is required");
+        return base.OnInitializedAsync();
+    }
+
+    protected async Task HandleCreateMovieButtonClicked()
+    {
+        if (_movieName is null || _movieDescription is null)
+            return;
+
+        var createMovieRequest = new CreateMovieRequest()
+        {
+            Name = _movieName,
+            Description = _movieDescription,
+            Price = _moviePrice,
+            Duration = _movieDuration
+        };
+
+        using var response = await Http.PostAsJsonAsync("api/movies", createMovieRequest);
+
+        var movie = await response.Content.ReadFromJsonAsync<MovieResponse>();
+
+        Console.WriteLine(movie!.Id);
+        NavManager.NavigateTo($"/movie/{movie!.Id}");
+    }
+}

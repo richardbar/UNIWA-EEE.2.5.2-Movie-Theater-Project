@@ -15,7 +15,7 @@ public sealed class Name : ValueOf<string, Name>
         if (string.IsNullOrWhiteSpace(Value))
             throw new ArgumentException("Name cannot be whitespaces", nameof(Name));
         
-        if (64 < Value.Length)
+        if (Constants.MovieNameMaxLength < Value.Length)
             throw new ArgumentException("Name cannot be longer that 64 characters", nameof(Name));
     }
 }
