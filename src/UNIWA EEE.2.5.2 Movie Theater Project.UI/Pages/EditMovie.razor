@@ -1,0 +1,189 @@
+﻿@page "/editmovie/{Id:guid}"
+@using MovieTheaterProject.Domain
+@using MovieTheaterProject.Domain.Contracts.Requests.Movie
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
+<h3>Update Movie</h3>
+
+@if (_movie is not null)
+{
+    <div class="container">
+        <form class="row" novalidate>
+            <div class="col-md-12">
+                <label for="updateMovieName" class="form-label">Movie Name</label>
+                <input type="text" class="form-control @(_movieNameInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieName placeholder="Enter Movie's Name" required />
+                @if (_movieNameInvalidErrorsFound)
+                {
+                    <div class="invalid-feedback">
+                        @foreach (var validationError in _movieNameInvalidErrors)
+                        {
+                            @validationError
+                        }
+                    </div>
+                }
+            </div>
+
+            <br />
+
+            <div class="col-md-12">
+                <label for="updateMovieDescription" class="form-label">Movie Description</label>
+                <textarea type="text" class="form-control @(_movieDescriptionInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieDescription placeholder="Enter Movie's Description" required rows="5" />
+                @if (_movieDescriptionInvalidErrorsFound)
+                {
+                    <div class="invalid-feedback">
+                        @foreach (var validationError in _movieDescriptionInvalidErrors)
+                        {
+                            @validationError
+                        }
+                    </div>
+                }
+            </div>
+
+            <br />
+
+            <div class="col-md-12">
+                <label for="updateMoviePrice" class="form-label">Movie Price</label>
+                <input type="number" class="form-control @(_moviePriceInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MoviePrice placeholder="Enter Movie's Price" required />
+                @if (_moviePriceInvalidErrorsFound)
+                {
+                    <div class="invalid-feedback">
+                        @foreach (var validationError in _moviePriceInvalidErrors)
+                        {
+                            @validationError
+                        }
+                    </div>
+                }
+            </div>
+
+            <br />
+
+            <div class="col-md-12">
+                <label for="updateMovieDurationHour" class="form-label">Movie Duration</label>
+                <input type="text" class="form-control" readonly value="@(new TimeSpan(0, 0, (int)_movie!.Duration).Hours):@(new TimeSpan(0, 0, (int)_movie!.Duration).Minutes):00" required />
+            </div>
+
+            <br />
+
+            <div class="col-12">
+                <button class="btn btn-primary" @onclick="HandleUpdateMovieButtonClicked">Update Movie</button>
+            </div>
+        </form>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private MovieResponse? _movie;
+
+    private string? _movieName;
+    private string? _movieDescription;
+    private float _moviePrice = (float)Math.Round(.0d, 2);
+
+    private bool _movieNameInvalidErrorsFound = true;
+    private bool _movieDescriptionInvalidErrorsFound = true;
+    private bool _moviePriceInvalidErrorsFound = false;
+
+    private List<string> _movieNameInvalidErrors = new();
+    private List<string> _movieDescriptionInvalidErrors = new();
+    private List<string> _moviePriceInvalidErrors = new();
+
+    private string? MovieName
+    {
+        get
+        {
+            return _movieName;
+        }
+        set
+        {
+            _movieNameInvalidErrors.Clear();
+
+            if (value is null || value.Length == 0)
+                _movieNameInvalidErrors.Add("Movie Name is required");
+
+            if (Constants.MovieNameMaxLength < value?.Length)
+                _movieNameInvalidErrors.Add($"Movie Name cannot exceed {Constants.MovieNameMaxLength} characters");
+
+            _movieNameInvalidErrorsFound = _movieNameInvalidErrors.Count() != 0;
+
+            _movieName = value;
+        }
+    }
+
+    private string? MovieDescription
+    {
+        get
+        {
+            return _movieDescription;
+        }
+        set
+        {
+            _movieDescriptionInvalidErrors.Clear();
+
+            if (value is null || value.Length == 0)
+                _movieDescriptionInvalidErrors.Add("Movie Description is required");
+
+            if (Constants.MovieDescriptMaxLength < value?.Length)
+                _movieDescriptionInvalidErrors.Add($"Movie Description cannot exceed {Constants.MovieDescriptMaxLength} characters");
+
+            _movieDescriptionInvalidErrorsFound = _movieDescriptionInvalidErrors.Count() != 0;
+
+            _movieDescription = value;
+        }
+    }
+
+    private float MoviePrice
+    {
+        get
+        {
+            return _moviePrice;
+        }
+        set
+        {
+            _moviePriceInvalidErrors.Clear();
+
+            if (value < .0f)
+                _moviePriceInvalidErrors.Add("Movie Price cannot be negative");
+
+            _moviePriceInvalidErrorsFound = _moviePriceInvalidErrors.Count() != 0;
+
+            _moviePrice = (float)Math.Round(value, 2);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _movie = await Http.GetFromJsonAsync<MovieResponse>($"/api/movies/{Id}");
+        if (_movie is null)
+            NavManager.NavigateTo($"/404");
+        MovieName = _movie!.Name;
+        MovieDescription = _movie!.Description;
+        MoviePrice = _movie!.Price;
+
+        _movieNameInvalidErrors.Add("Movie Name is required");
+        _movieDescriptionInvalidErrors.Add("Movie Description is required");
+    }
+
+    protected async Task HandleUpdateMovieButtonClicked()
+    {
+        if (_movieName is null || _movieDescription is null)
+            return;
+
+        var updateMovieRequest = new UpdateMovieRequest()
+        {
+            Id = Id,
+            Name = _movieName,
+            Description = _movieDescription,
+            Price = _moviePrice
+        };
+
+        using var response = await Http.PutAsJsonAsync($"api/movies/{Id}", updateMovieRequest);
+
+        var movie = await response.Content.ReadFromJsonAsync<MovieResponse>();
+
+        NavManager.NavigateTo($"/movie/{movie!.Id}");
+    }
+}
