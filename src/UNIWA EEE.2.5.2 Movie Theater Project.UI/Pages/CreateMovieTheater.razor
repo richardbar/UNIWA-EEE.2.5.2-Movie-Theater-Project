@@ -1,0 +1,179 @@
+﻿@page "/createmovietheater"
+@using MovieTheaterProject.Domain
+@using MovieTheaterProject.Domain.Contracts.Requests.MovieTheater
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
+
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager NavManager
+
+<h3>Create Movie Theater</h3>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div class="toast hide" role="alert" aria-live="assertive" id="CreateMovieTheaterToast" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Create Movie Theater Notification</strong>
+            <small>Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Created a movie theater with the name "@MovieTheaterName" with a size @(MovieTheaterRows)x@(MovieTheaterColumns)
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <form class="row" novalidate>
+        <div class="col-md-12">
+            <label for="createMovieTheaterName" class="form-label">Movie Theater Name</label>
+            <input type="text" class="form-control @(_movieTheaterNameInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieTheaterName placeholder="Enter Movie Theater's Name" required />
+            @if (_movieTheaterNameInvalidErrorsFound)
+            {
+                <div class="invalid-feedback">
+                    @foreach (var validationError in _movieTheaterNameInvalidErrors)
+                    {
+                        @validationError
+                    }
+                </div>
+            }
+        </div>
+
+        <br />
+
+        <div class="col-md-6">
+            <label for="createMovieTheaterRows" class="form-label">Movie Rows</label>
+            <input type="number" class="form-control @(_movieTheaterRowsInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieTheaterRows placeholder="Enter Movie Theater's Rows" required rows="5" />
+            @if (_movieTheaterRowsInvalidErrorsFound)
+            {
+                <div class="invalid-feedback">
+                    @foreach (var validationError in _movieTheaterRowsInvalidErrors)
+                    {
+                        @validationError
+                    }
+                </div>
+            }
+        </div>
+
+        <br />
+
+        <div class="col-md-6">
+            <label for="createMovieTheaterColumns" class="form-label">Movie Columns</label>
+            <input type="number" class="form-control @(_movieTheaterColumnsInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieTheaterColumns placeholder="Enter Movie Theater's Columns" required rows="5" />
+            @if (_movieTheaterColumnsInvalidErrorsFound)
+            {
+                <div class="invalid-feedback">
+                    @foreach (var validationError in _movieTheaterColumnsInvalidErrors)
+                    {
+                        @validationError
+                    }
+                </div>
+            }
+        </div>
+
+        <br />
+
+        <div class="col-12">
+            <button type="button" class="btn btn-primary" @onclick="HandleCreateMovieTheaterButtonClicked">Create Movie Theater</button>
+        </div>
+    </form>
+</div>
+
+@code {
+    private string? _movieTheaterName;
+    private ushort _movieTheaterRows = 5;
+    private ushort _movieTheaterColumns = 3;
+
+    private bool _movieTheaterNameInvalidErrorsFound = true;
+    private bool _movieTheaterRowsInvalidErrorsFound = false;
+    private bool _movieTheaterColumnsInvalidErrorsFound = false;
+
+    private List<string> _movieTheaterNameInvalidErrors = new()
+    {
+        "Movie Name is required"
+    };
+    private List<string> _movieTheaterRowsInvalidErrors = new();
+    private List<string> _movieTheaterColumnsInvalidErrors = new();
+
+    private string? MovieTheaterName
+    {
+        get
+        {
+            return _movieTheaterName;
+        }
+        set
+        {
+            _movieTheaterNameInvalidErrors.Clear();
+
+            if (value is null || value.Length == 0)
+                _movieTheaterNameInvalidErrors.Add("Movie Theater Name is required");
+
+            if (Constants.MovieNameMaxLength < value?.Length)
+                _movieTheaterNameInvalidErrors.Add($"Movie Theater Name cannot exceed {Constants.MovieNameMaxLength} characters");
+
+            _movieTheaterNameInvalidErrorsFound = _movieTheaterNameInvalidErrors.Count() != 0;
+
+            _movieTheaterName = value;
+        }
+    }
+
+    private ushort MovieTheaterRows
+    {
+        get
+        {
+            return _movieTheaterRows;
+        }
+        set
+        {
+            _movieTheaterRowsInvalidErrors.Clear();
+
+            if (value == 0)
+                _movieTheaterRowsInvalidErrors.Add("Movie Theater rows cannot be 0");
+
+            _movieTheaterRowsInvalidErrorsFound = _movieTheaterRowsInvalidErrors.Count() != 0;
+
+            _movieTheaterRows = value;
+        }
+    }
+
+    private ushort MovieTheaterColumns
+    {
+        get
+        {
+            return _movieTheaterColumns;
+        }
+        set
+        {
+            _movieTheaterColumnsInvalidErrors.Clear();
+
+            if (value == 0)
+                _movieTheaterColumnsInvalidErrors.Add("Movie Theater columns cannot be 0");
+
+            _movieTheaterColumnsInvalidErrorsFound = _movieTheaterColumnsInvalidErrors.Count() != 0;
+
+            _movieTheaterColumns = value;
+        }
+    }
+
+    protected async Task HandleCreateMovieTheaterButtonClicked(EventArgs e)
+    {
+        if (_movieTheaterName is null)
+            return;
+
+        var createMovieTheaterRequest = new CreateMovieTheaterRequest()
+        {
+            Name = MovieTheaterName,
+            Rows = MovieTheaterRows,
+            Columns = MovieTheaterColumns
+        };
+
+        await Http.PostAsJsonAsync<CreateMovieTheaterRequest>("api/movietheaters", createMovieTheaterRequest);
+
+        await JS.InvokeVoidAsync("showToast", "CreateMovieTheaterToast");
+
+        await Task.Delay(5000);
+
+        MovieTheaterName = "";
+        MovieTheaterRows = 5;
+        MovieTheaterColumns = 3;
+    }
+}
