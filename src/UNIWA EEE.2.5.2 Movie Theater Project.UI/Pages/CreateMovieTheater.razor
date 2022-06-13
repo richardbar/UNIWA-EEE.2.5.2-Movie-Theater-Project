@@ -9,19 +9,6 @@
 
 <h3>Create Movie Theater</h3>
 
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div class="toast hide" role="alert" aria-live="assertive" id="CreateMovieTheaterToast" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Create Movie Theater Notification</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            Created a movie theater with the name "@MovieTheaterName" with a size @(MovieTheaterRows)x@(MovieTheaterColumns)
-        </div>
-    </div>
-</div>
-
 <div class="container">
     <form class="row" novalidate>
         <div class="col-md-12">
@@ -160,17 +147,18 @@
             return;
 
         var createMovieTheaterRequest = new CreateMovieTheaterRequest()
-        {
-            Name = MovieTheaterName,
-            Rows = MovieTheaterRows,
-            Columns = MovieTheaterColumns
-        };
+            {
+                Name = MovieTheaterName,
+                Rows = MovieTheaterRows,
+                Columns = MovieTheaterColumns
+            };
 
         await Http.PostAsJsonAsync<CreateMovieTheaterRequest>("api/movietheaters", createMovieTheaterRequest);
 
-        await JS.InvokeVoidAsync("showToast", "CreateMovieTheaterToast");
-
-        await Task.Delay(5000);
+        await JS.InvokeVoidAsync("AddToast", 
+            $"Created a movie theater with the name \"{MovieTheaterName}\" with a size {MovieTheaterRows}x{MovieTheaterColumns}", 
+            "Create Movie Theater Notification", 
+            false);
 
         MovieTheaterName = "";
         MovieTheaterRows = 5;

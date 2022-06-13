@@ -25,19 +25,33 @@
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 
     <script>
-        function showToast(id)
-        {
+        function uuidv4() {
+            return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
+
+        function AddToast(body, title = 'UNIWA EEE.2.5.2 Movie Theater Project.UI', autohide = true, delay = 5000) {
             var option =
             {
                 animation: true,
-                delay: 5000
+                autohide: autohide,
+                delay: delay
             };
 
-            var toastHTMLElement = document.getElementById(id);
+            const toastHTMLElement = document.getElementById('toastTemplate').cloneNode(true);
+            toastHTMLElement.id = uuidv4();
+
+            toastHTMLElement.children[0].children[0].id = uuidv4();
+            toastHTMLElement.children[0].children[0].textContent = title;
+
+            toastHTMLElement.lastChild.id = uuidv4();
+            toastHTMLElement.lastChild.textContent = body;
+
+            document.getElementById('toastContainer').appendChild(toastHTMLElement);
 
             var toastElement = new bootstrap.Toast(toastHTMLElement, option);
             toastElement.show();
-
         }
     </script>
 </body>
