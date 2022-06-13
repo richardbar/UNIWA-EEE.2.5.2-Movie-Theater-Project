@@ -1,0 +1,165 @@
+﻿@page "/createmovieviewing"
+@using MovieTheaterProject.Domain
+@using MovieTheaterProject.Domain.Contracts.Requests.MovieViewing
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
+
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<h3>Create Movie Viewing</h3>
+
+@if (_movies is null || _movieTheaters is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="container">
+        <form class="col-md-12">
+            <div class="col-md-12">
+                <label for="createMovieViewingMovie" class="form-label">Movie</label>
+                <select class="form-select" @bind="_movieIndex">
+                    @for (var i = 0; i < _movies.Length; i++)
+                    {
+                        <option value="@i">@_movies[i].Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-12">
+                <label for="createMovieViewingMovieTheater" class="form-label">Movie Theater</label>
+                <select class="form-select" @bind="_movieTheaterIndex">
+                    @for (var i = 0; i < _movieTheaters.Length; i++)
+                    {
+                        <option value="@i">@_movieTheaters[i].Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-12">
+            <label for="createMovieDurationHour" class="form-label">Movie Duration</label>
+            <div class="input-group">
+                <input type="number" class="form-control @(_movieStartTimeInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieStartTimeHour placeholder="Hour" required />
+                <input type="number" class="form-control @(_movieStartTimeInvalidErrorsFound ? "is-invalid" : "is-valid")" @bind=MovieStartTimeMinute placeholder="Minute" required />
+                @if (_movieStartTimeInvalidErrorsFound)
+                {
+                    <div class="invalid-feedback">
+                        @foreach (var validationError in _movieStartTimeInvalidErrors)
+                        {
+                            @validationError
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+            <br />
+
+            <div class="col-12">
+                <button type="button" class="btn btn-primary" @onclick="HandleScheduleMovieViewingButtonClicked">Schedule Movie Viewing</button>
+            </div>
+        </form>
+    </div>
+}
+
+@code {
+    private MovieResponse[] _movies = null;
+    private MovieTheaterResponse[] _movieTheaters = null;
+
+    private bool _movieStartTimeInvalidErrorsFound => _movieStartTimeInvalidErrors.Count != 0;
+    private List<string> _movieStartTimeInvalidErrors = new();
+
+    private int _movieIndex = 0;
+    private int _movieTheaterIndex = 0;
+    private long _movieStartTime = (long)Constants.MovieViewingsStart;
+
+    private ulong MovieStartTimeHour
+    {
+        get
+        {
+            return (ulong)(Math.Floor(_movieStartTime / 3600f));
+        }
+        set
+        {
+            _movieStartTimeInvalidErrors.Clear();
+
+            if (value < 0)
+                _movieStartTimeInvalidErrors.Add("Movie start time hour cannot be negative");
+
+            var minimumStartTime = new TimeSpan(0, 0, (int)Constants.MovieViewingsStart);
+            var maximumStartTime = new TimeSpan(0, 0, (int)(Constants.MovieViewingsEnd - _movies[_movieIndex].Duration));
+
+            var startTime = new TimeSpan((int)value, (int)MovieStartTimeMinute, 0);
+            if (startTime < minimumStartTime)
+                _movieStartTimeInvalidErrors.Add($"Movie minimum start time is {minimumStartTime.Hours}:{minimumStartTime.Minutes}:00");
+            if (maximumStartTime < startTime)
+                _movieStartTimeInvalidErrors.Add($"Movie maximum start time is {maximumStartTime.Hours}:{maximumStartTime.Minutes}:00");
+
+            _movieStartTime = (long)(startTime.TotalSeconds);
+        }
+    }
+
+    private ulong MovieStartTimeMinute
+    {
+        get
+        {
+            return (ulong)((_movieStartTime % 3600) / 60);
+        }
+        set
+        {
+            _movieStartTimeInvalidErrors.Clear();
+
+            if (value < 0)
+                _movieStartTimeInvalidErrors.Add("Movie start time minute cannot be negative");
+
+            if (60 < value)
+                _movieStartTimeInvalidErrors.Add("Movie start time minute cannot exceed 60");
+
+            var minimumStartTime = new TimeSpan(0, 0, (int)Constants.MovieViewingsStart);
+            var maximumStartTime = new TimeSpan(0, 0, (int)(Constants.MovieViewingsEnd - _movies[_movieIndex].Duration));
+
+            var startTime = new TimeSpan((int)MovieStartTimeHour, (int)value, 0);
+            if (startTime < minimumStartTime)
+                _movieStartTimeInvalidErrors.Add($"Movie first start time is {minimumStartTime.Hours}:{minimumStartTime.Minutes}:00");
+            if (maximumStartTime < startTime)
+                _movieStartTimeInvalidErrors.Add($"Movie latest start time is {maximumStartTime.Hours}:{maximumStartTime.Minutes}:00");
+
+            _movieStartTime = (long)(startTime.TotalSeconds);
+        }
+    }
+
+
+    private async Task HandleScheduleMovieViewingButtonClicked()
+    {
+        if (_movieStartTimeInvalidErrorsFound)
+            return;
+
+        var createMovieViewingRequest = new CreateMovieViewingRequest
+        {
+            MovieId = _movies[_movieIndex].Id.ToString(),
+            MovieTheaterId = _movieTheaters[_movieIndex].Id.ToString(),
+            StartTime = _movieStartTime
+        };
+
+        using var response = await Http.PostAsJsonAsync<CreateMovieViewingRequest>("api/movieviewings", createMovieViewingRequest);
+
+        var movieViewing = await response.Content.ReadFromJsonAsync<MovieViewingResponse>();
+
+        await JS.InvokeVoidAsync("AddToast", 
+            $"Created a movie viewing for the movie \"{_movies[_movieIndex].Name}\" in \"{_movieTheaters[_movieTheaterIndex].Name}\" that starts at {MovieStartTimeHour}:{MovieStartTimeMinute}:00", 
+            "Create Movie Viewing Notification", 
+            false);
+
+        _movieIndex = 0;
+        _movieTheaterIndex = 0;
+        _movieStartTime = (long)Constants.MovieViewingsStart;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _movies = (await Http.GetFromJsonAsync<GetAllMoviesResponse>("api/movies")).Movies.ToArray();
+        _movieTheaters = (await Http.GetFromJsonAsync<GetAllMovieTheatersResponse>("api/movietheaters")).MovieTheaters.ToArray();
+    }
+}
