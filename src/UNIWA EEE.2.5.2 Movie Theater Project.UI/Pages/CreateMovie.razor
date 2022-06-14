@@ -2,7 +2,9 @@
 @using MovieTheaterProject.Domain
 @using MovieTheaterProject.Domain.Contracts.Requests.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
+
 @inject HttpClient Http
+@inject IJSRuntime JS
 @inject NavigationManager NavManager
 
 <h3>Create Movie</h3>
@@ -77,7 +79,7 @@
         <br />
 
         <div class="col-12">
-            <button class="btn btn-primary" @onclick="HandleCreateMovieButtonClicked">Create Movie</button>
+            <button type="button" class="btn btn-primary" @onclick="HandleCreateMovieButtonClicked">Create Movie</button>
         </div>
     </form>
 </div>
@@ -232,17 +234,24 @@
 
         var createMovieRequest = new CreateMovieRequest()
         {
-            Name = _movieName,
-            Description = _movieDescription,
-            Price = _moviePrice,
+            Name = MovieName,
+            Description = MovieDescription,
+            Price = MoviePrice,
             Duration = _movieDuration
         };
 
-        using var response = await Http.PostAsJsonAsync("api/movies", createMovieRequest);
+        using var response = await Http.PostAsJsonAsync<CreateMovieRequest>("api/movies", createMovieRequest);
 
         var movie = await response.Content.ReadFromJsonAsync<MovieResponse>();
 
-        Console.WriteLine(movie!.Id);
-        NavManager.NavigateTo($"/movie/{movie!.Id}");
+        await JS.InvokeVoidAsync("AddToast", 
+            $"Created a movie with the name \"{MovieName}\" priced it at {MoviePrice} and lasts {MovieDurationHour}:{MovieDurationMinute}:00", 
+            "Create Movie Notification", 
+            false);
+
+        MovieName = "";
+        MovieDescription = "";
+        MoviePrice = (float)Math.Round(.0d, 2);
+        _movieDuration = (long)Constants.MovieMinimumDuration.TotalSeconds;
     }
 }

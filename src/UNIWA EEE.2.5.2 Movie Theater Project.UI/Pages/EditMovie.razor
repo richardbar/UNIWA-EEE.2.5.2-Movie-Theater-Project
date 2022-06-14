@@ -2,7 +2,9 @@
 @using MovieTheaterProject.Domain
 @using MovieTheaterProject.Domain.Contracts.Requests.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
+
 @inject HttpClient Http
+@inject IJSRuntime JS
 @inject NavigationManager NavManager
 
 <h3>Update Movie</h3>
@@ -67,7 +69,7 @@
             <br />
 
             <div class="col-12">
-                <button class="btn btn-primary" @onclick="HandleUpdateMovieButtonClicked">Update Movie</button>
+                <button type="button" class="btn btn-primary" @onclick="HandleUpdateMovieButtonClicked">Update Movie</button>
             </div>
         </form>
     </div>
@@ -180,10 +182,13 @@
             Price = _moviePrice
         };
 
-        using var response = await Http.PutAsJsonAsync($"api/movies/{Id}", updateMovieRequest);
+        using var response = await Http.PutAsJsonAsync<UpdateMovieRequest>($"api/movies/{Id}", updateMovieRequest);
 
         var movie = await response.Content.ReadFromJsonAsync<MovieResponse>();
 
-        NavManager.NavigateTo($"/movie/{movie!.Id}");
+        await JS.InvokeVoidAsync("AddToast", 
+            $"Updated movie with the name id {Id} with the name \"{MovieName}\" priced it at {MoviePrice}", 
+            "Update Movie Notification", 
+            false);
     }
 }
