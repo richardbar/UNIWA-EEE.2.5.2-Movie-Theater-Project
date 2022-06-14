@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using MovieTheaterProject.UI.Utilities.LoginManager
+@inherits LayoutComponentBase
+
+@inject ILoginManager loginManager
 
 <div class="page">
     <div class="sidebar">
@@ -7,7 +10,14 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            @if (_loggedIn)
+            {
+                <button type="button" class="btn btn-danger" @onclick="HandleLogoutButtonClicked">Log out</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-info" @onclick="HandleLoginButtonClicked">Log in</button>
+            }
         </div>
 
         <article class="content px-4">
@@ -28,3 +38,17 @@
         </article>
     </main>
 </div>
+
+@code {
+    private bool _loggedIn => loginManager.IsLoggedIn();
+
+    private void HandleLoginButtonClicked()
+    {
+        loginManager.Login();
+    }
+
+    private async Task HandleLogoutButtonClicked()
+    {
+        loginManager.Logout();
+    }
+}
