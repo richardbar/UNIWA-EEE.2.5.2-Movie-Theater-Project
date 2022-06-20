@@ -2,6 +2,7 @@
 @inherits LayoutComponentBase
 
 @inject ILoginManager loginManager
+@inject NavigationManager uriHelper;
 
 <div class="page">
     <div class="sidebar">
@@ -45,10 +46,14 @@
     private void HandleLoginButtonClicked()
     {
         loginManager.Login();
+
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
     private async Task HandleLogoutButtonClicked()
     {
         loginManager.Logout();
+
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 }
