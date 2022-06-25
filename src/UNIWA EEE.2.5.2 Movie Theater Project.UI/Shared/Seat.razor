@@ -41,6 +41,8 @@
 
     protected void ToggleSelected()
     {
+        if (Reserved)
+            return;
         Classes = (Classes == "seat selected") ? "" : "selected";
     }
 }
