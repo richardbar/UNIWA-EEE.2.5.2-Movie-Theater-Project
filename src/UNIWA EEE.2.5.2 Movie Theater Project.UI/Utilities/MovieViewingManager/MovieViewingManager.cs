@@ -12,7 +12,10 @@ public sealed class MovieViewingManager : IMovieViewingManager
     {
         _http = http;
     }
-    
+
+    public async Task<MovieViewingResponse?> GetMovieViewingById(Guid movieViewingId) =>
+        await _http.GetFromJsonAsync<MovieViewingResponse>($"api/movieviewings/{movieViewingId}");
+
     public async Task<MovieViewingResponse[]?> GetMovieViewingsByMovieId(Guid movieId)
     {
         var response = await _http.GetFromJsonAsync<GetAllMovieViewingsResponse>(

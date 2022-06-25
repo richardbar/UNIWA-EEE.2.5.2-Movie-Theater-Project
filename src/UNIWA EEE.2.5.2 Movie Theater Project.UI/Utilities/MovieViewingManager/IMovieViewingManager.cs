@@ -4,6 +4,8 @@ namespace MovieTheaterProject.UI.Utilities.MovieViewingManager;
 
 public interface IMovieViewingManager
 {
+    public Task<MovieViewingResponse?> GetMovieViewingById(Guid movieViewingId);
+
     public Task<MovieViewingResponse[]?> GetMovieViewingsByMovieId(Guid movieId);
 
     public Task DeleteMovieViewing(Guid movieViewingId);
