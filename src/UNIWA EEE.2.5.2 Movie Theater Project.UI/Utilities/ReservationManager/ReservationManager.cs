@@ -13,6 +13,9 @@ public sealed class ReservationManager : IReservationManager
         _http = http;
     }
 
+    public async Task<ReservationResponse?> GetReservationById(Guid reservationId) =>
+        await _http.GetFromJsonAsync<ReservationResponse>($"api/reservations/{reservationId}");
+
     public async Task<ReservationResponse[]?> GetReservationsByMovieViewingId(Guid movieViewingId)
     {
         var response = await _http.GetFromJsonAsync<GetAllReservationsResponse>(
