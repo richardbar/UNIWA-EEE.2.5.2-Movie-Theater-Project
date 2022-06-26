@@ -6,6 +6,7 @@ namespace MovieTheaterProject.UI.Utilities.ReservationManager;
 
 public sealed class ReservationManager : IReservationManager
 {
+    private static readonly string s_apiURL = "api/reservations";
     private HttpClient _http;
 
     public ReservationManager(HttpClient http)
@@ -14,12 +15,12 @@ public sealed class ReservationManager : IReservationManager
     }
 
     public async Task<ReservationResponse?> GetReservationById(Guid reservationId) =>
-        await _http.GetFromJsonAsync<ReservationResponse>($"api/reservations/{reservationId}");
+        await _http.GetFromJsonAsync<ReservationResponse>($"{s_apiURL}/{reservationId}");
 
     public async Task<ReservationResponse[]?> GetReservationsByMovieViewingId(Guid movieViewingId)
     {
         var response = await _http.GetFromJsonAsync<GetAllReservationsResponse>(
-            $"api/reservations?MovieViewingId={movieViewingId}");
+            $"{s_apiURL}?MovieViewingId={movieViewingId}");
 
         if (response is null)
             return default!;
@@ -27,5 +28,22 @@ public sealed class ReservationManager : IReservationManager
         var reservations = response.Reservations.ToArray();
 
         return reservations;
+    }
+
+    public async Task<ReservationResponse[]?> GetAllReservations()
+    {
+        try
+        {
+            var response = await _http.GetFromJsonAsync<GetAllReservationsResponse>(s_apiURL);
+
+            if (response is null)
+                return null;
+
+            return response.Reservations.ToArray();
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
