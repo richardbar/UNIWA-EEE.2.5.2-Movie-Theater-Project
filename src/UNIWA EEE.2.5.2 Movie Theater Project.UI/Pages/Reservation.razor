@@ -1,4 +1,4 @@
-@page "/reservation/{Id:guid?}"
+﻿@page "/reservation/{Id:guid?}"
 
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
@@ -6,11 +6,15 @@
 @using MovieTheaterProject.Domain.Contracts.Responses.Reservation
 @using MovieTheaterProject.Domain.Entities
 @using MovieTheaterProject.UI.Utilities.MovieManager
+@using MovieTheaterProject.UI.Utilities.MovieViewingManager
+@using MovieTheaterProject.UI.Utilities.ReservationManager
 @using System.Text.Json
 
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject IMovieManager movieManager
+@inject IMovieViewingManager movieViewingManager
+@inject IReservationManager reservationManager
 @inject NavigationManager NavManager
 
 @if (Id is null)
@@ -83,51 +87,38 @@ else if (_dataLoaded)
     private bool _collapsePrintButton = false;
     private string? _printCssClass => _collapsePrintButton ? "collapse" : null;
 
-    private async Task LoadReservationDataAsync()
+    private async Task<bool> LoadReservationDataAsync()
     {
-        if (Id is null)
-            return;
-
-        var reservation = await Http.GetFromJsonAsync<ReservationResponse>($"api/reservations/{Id}");
-        if (reservation is null)
-            throw new Exception();
-
-        _reservation = reservation;
+        _reservation = await reservationManager.GetReservationById((Guid)Id);
+        return _reservation is not null;
     }
 
-    private async Task LoadMovieViewingDataAsync()
+    private async Task<bool> LoadMovieViewingDataAsync()
     {
-        if (_reservation is null)
-            throw new Exception();
-
-        var movieViewing = await Http.GetFromJsonAsync<MovieViewingResponse>($"api/movieviewings/{_reservation.MovieViewingId}");
+        var movieViewing = await movieViewingManager.GetMovieViewingById(_reservation.MovieViewingId);
         if (movieViewing is null)
-            throw new Exception();
+            return false;
 
         _movieViewing = movieViewing;
         _movieStartTime = new(0, 0, (int)_movieViewing.StartTime);
+        return true;
     }
 
-    private async Task LoadMovieDataAsync()
+    private async Task<bool> LoadMovieDataAsync()
     {
         var movie = await movieManager.GetMovieById(_movieViewing.MovieId);
         if (movie is null)
-            throw new Exception();
+            return false;
 
         _movie = movie;
         _movieDuration = new(0, 0, (int)_movie.Duration);
+        return true;
     }
 
-    private async Task LoadMovieTheaterDataAsync()
+    private async Task<bool> LoadMovieTheaterDataAsync()
     {
-        if (_movieViewing is null)
-            throw new Exception();
-
-        var movieTheater = await Http.GetFromJsonAsync<MovieTheaterResponse>($"api/movietheaters/{_movieViewing.MovieTheaterId}");
-        if (movieTheater is null)
-            throw new Exception();
-
-        _movieTheater = movieTheater;
+        _movieTheater = await Http.GetFromJsonAsync<MovieTheaterResponse>($"api/movietheaters/{_movieViewing.MovieTheaterId}");
+        return _movieTheater is not null;
     }
 
     protected async Task HandleLoadReservationButtonClicked()
@@ -137,7 +128,14 @@ else if (_dataLoaded)
             return;
         Id = id;
 
-        await LoadDataAsync();
+        if (!await LoadDataAsync())
+        {
+            await JS.InvokeVoidAsync("AddToast", 
+                $"Could not load reservation details", 
+                "Reservation Notification", 
+                false);
+            Id = null;
+        }
     }
 
     protected async Task HandlePrintButtonClicked()
@@ -161,20 +159,28 @@ else if (_dataLoaded)
         _collapsePrintButton = false;
     }
 
-    protected async Task LoadDataAsync()
+    protected async Task<bool> LoadDataAsync()
     {
         try
         {
-            await LoadReservationDataAsync();
-            await LoadMovieViewingDataAsync();
-            await LoadMovieDataAsync();
-            await LoadMovieTheaterDataAsync();
+            if (!await LoadReservationDataAsync())
+                return false;
+
+            if (!await LoadMovieViewingDataAsync())
+                return false;
+            if (!await LoadMovieDataAsync())
+                return false;
+
+            if (!await LoadMovieTheaterDataAsync())
+                return false;
 
             _dataLoaded = true;
+
+            return true;
         }
         catch
         {
-            Id = null;
+            return false;
         }
     }
 
@@ -183,7 +189,13 @@ else if (_dataLoaded)
         if (Id is null)
             return;
 
-        await LoadDataAsync();
+        if (!await LoadDataAsync())
+        {
+            await JS.InvokeVoidAsync("AddToast", 
+                $"Could not load reservation details", 
+                "Reservation Notification", 
+                false);
+            Id = null;
+        }
     }
-
 }

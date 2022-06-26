@@ -1,14 +1,16 @@
-@page "/createmovieviewing"
+﻿@page "/createmovieviewing"
 @using MovieTheaterProject.Domain
 @using MovieTheaterProject.Domain.Contracts.Requests.MovieViewing
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
 @using MovieTheaterProject.UI.Utilities.MovieManager
+@using MovieTheaterProject.UI.Utilities.MovieViewingManager
 
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject IMovieManager movieManager
+@inject IMovieViewingManager movieViewingManager
 
 <h3>Create Movie Viewing</h3>
 
@@ -138,16 +140,7 @@ else
         if (_movieStartTimeInvalidErrorsFound)
             return;
 
-        var createMovieViewingRequest = new CreateMovieViewingRequest
-        {
-            MovieId = _movies[_movieIndex].Id.ToString(),
-            MovieTheaterId = _movieTheaters[_movieTheaterIndex].Id.ToString(),
-            StartTime = _movieStartTime
-        };
-
-        using var response = await Http.PostAsJsonAsync<CreateMovieViewingRequest>("api/movieviewings", createMovieViewingRequest);
-
-        var movieViewing = await response.Content.ReadFromJsonAsync<MovieViewingResponse>();
+        await movieViewingManager.CreateMovieViewing(_movies[_movieIndex].Id, _movieTheaters[_movieTheaterIndex].Id, _movieStartTime);
 
         await JS.InvokeVoidAsync("AddToast", 
             $"Created a movie viewing for the movie \"{_movies[_movieIndex].Name}\" in \"{_movieTheaters[_movieTheaterIndex].Name}\" that starts at {MovieStartTimeHour}:{MovieStartTimeMinute}:00", 
