@@ -8,5 +8,7 @@ public interface IMovieViewingManager
 
     public Task<MovieViewingResponse[]?> GetMovieViewingsByMovieId(Guid movieId);
 
+    public Task<MovieViewingResponse?> CreateMovieViewing(Guid movieId, Guid movieTheaterId, long startTime);
+
     public Task DeleteMovieViewing(Guid movieViewingId);
 }
