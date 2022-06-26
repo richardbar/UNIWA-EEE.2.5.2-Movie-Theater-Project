@@ -1,0 +1,161 @@
+﻿@page "/income"
+@using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
+@using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
+@using MovieTheaterProject.Domain.Contracts.Responses.Reservation
+@using MovieTheaterProject.UI.Utilities.MovieManager
+@using MovieTheaterProject.UI.Utilities.MovieTheaterManager
+@using MovieTheaterProject.UI.Utilities.MovieViewingManager
+@using MovieTheaterProject.UI.Utilities.ReservationManager
+
+@inject IMovieManager movieManager
+@inject IMovieViewingManager movieViewingManager
+@inject IMovieTheaterManager movieTheaterManager
+@inject IReservationManager reservationManager
+
+<h3>Income</h3>
+
+@if (_reservations is null || _movies is null || _movieTheaters is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group">
+                <label class="input-group-text" for="incomeMovieSelection">Movie</label>
+                <select class="form-select" id="incomeMovieSelection" @bind="MovieIndex">
+                    <option value="0" selected>All movies</option>
+                    @if (_movies is not null)
+                    {
+                        for (int i = 0; i < _movies.Length; i++)
+                        {
+                            <option value="@(i + 1)">@_movies[i].Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="input-group">
+                <label class="input-group-text" for="incomeMovieTheaterSelection">Movie</label>
+                <select class="form-select" id="incomeMovieTheaterSelection" @bind="MovieTheaterIndex">
+                    <option value="0" selected>All movie theaters</option>
+                    @if (_movieTheaters is not null)
+                    {
+                        for (int i = 0; i < _movieTheaters.Length; i++)
+                        {
+                            <option value="@(i + 1)">@_movieTheaters[i].Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <br />
+
+    <dl class="row">
+        <dt class = "col-sm-2">Income</dt>
+        <dd class = "col-sm-10">@_income</dd>
+    </dl>
+}
+
+@code {
+    private List<ReservationResponse>? _reservations;
+    private MovieViewingResponse[]? _movieViewings;
+    private MovieResponse[]? _movies;
+    private MovieTheaterResponse[]? _movieTheaters;
+
+    private int _movieIndex = 0;
+    private int _movieTheaterIndex = 0;
+
+    private int MovieIndex
+    {
+        get
+        {
+            return _movieIndex;
+        }
+        set
+        {
+            _movieIndex = value;
+            CalculateIncome();
+        }
+    }
+
+    private int MovieTheaterIndex
+    {
+        get
+        {
+            return _movieTheaterIndex;
+        }
+        set
+        {
+            _movieTheaterIndex = value;
+            CalculateIncome();
+        }
+    }
+
+
+    private float _income = .0f;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _reservations = (await reservationManager.GetAllReservations()).ToList();
+        Console.WriteLine($"Loaded {((_reservations is not null) ? "successfully" : "successfully")} reservations");
+
+        _movieViewings = await movieViewingManager.GetAllMovieViewings();
+        Console.WriteLine($"Loaded {((_movieViewings is not null) ? "successfully" : "successfully")} movie viewings");
+
+        _movies = await movieManager.GetAllMovies();
+        Console.WriteLine($"Loaded {((_movies is not null) ? "successfully" : "successfully")} movies");
+
+        _movieTheaters = await movieTheaterManager.GetAllMovieTheaters();
+        Console.WriteLine($"Loaded {((_movieTheaters is not null) ? "successfully" : "successfully")} movie theaters");
+
+        CalculateIncome();
+    }
+
+    private void CalculateIncome()
+    {
+        var enumerableReservations = _reservations.AsEnumerable();
+
+        if (_movieIndex != 0)
+        {
+            var movieViewings = _movieViewings.Where(movieViewing => movieViewing.MovieId == _movies[MovieIndex - 1].Id).ToList();
+
+            enumerableReservations = enumerableReservations.Where(reservation =>
+                {
+                    foreach (var movieViewing in movieViewings)
+                    {
+                        if (movieViewing.Id == reservation.MovieViewingId)
+                            return true;
+                    }
+
+                    return false;
+                });
+        }
+
+        if (_movieTheaterIndex != 0)
+        {
+            var movieViewings = _movieViewings.Where(movieViewing => movieViewing.MovieTheaterId == _movieTheaters[MovieTheaterIndex - 1].Id).ToList();
+
+            enumerableReservations = enumerableReservations.Where(reservation =>
+                {
+                    foreach (var movieViewing in movieViewings)
+                    {
+                        if (movieViewing.Id == reservation.MovieViewingId)
+                            return true;
+                    }
+
+                    return false;
+                });
+        }
+
+        _income = enumerableReservations.Sum(reservatuion => reservatuion.PricePaid);
+        _income = (float)Math.Round(_income, 2);
+    }
+}
