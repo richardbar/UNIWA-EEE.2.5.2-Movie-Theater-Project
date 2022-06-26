@@ -1,15 +1,16 @@
-﻿@page "/reservation/{Id:guid?}"
-@using System.Net.Http.Json
-@using System.Text
+@page "/reservation/{Id:guid?}"
 
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
 @using MovieTheaterProject.Domain.Contracts.Responses.Reservation
 @using MovieTheaterProject.Domain.Entities
+@using MovieTheaterProject.UI.Utilities.MovieManager
+@using System.Text.Json
 
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IMovieManager movieManager
 @inject NavigationManager NavManager
 
 @if (Id is null)
@@ -21,7 +22,7 @@
             <small id="reservationIdInputHelp" class="form-text text-muted">Input the reservation Id that you received when making a recervation.</small>
         </div>
         <br />
-        <button type="submit" class="btn btn-primary" @onclick="HandleLoadReservationButtonClicked">Load Reservation</button>
+        <button type="button" class="btn btn-primary" @onclick="HandleLoadReservationButtonClicked">Load Reservation</button>
     </form>
 }
 else if (_dataLoaded)
@@ -109,10 +110,7 @@ else if (_dataLoaded)
 
     private async Task LoadMovieDataAsync()
     {
-        if (_movieViewing is null)
-            throw new Exception();
-
-        var movie = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{_movieViewing.MovieId}");
+        var movie = await movieManager.GetMovieById(_movieViewing.MovieId);
         if (movie is null)
             throw new Exception();
 

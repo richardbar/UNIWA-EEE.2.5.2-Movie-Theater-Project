@@ -1,12 +1,14 @@
-﻿@page "/createmovieviewing"
+@page "/createmovieviewing"
 @using MovieTheaterProject.Domain
 @using MovieTheaterProject.Domain.Contracts.Requests.MovieViewing
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
+@using MovieTheaterProject.UI.Utilities.MovieManager
 
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IMovieManager movieManager
 
 <h3>Create Movie Viewing</h3>
 
@@ -159,7 +161,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _movies = (await Http.GetFromJsonAsync<GetAllMoviesResponse>("api/movies")).Movies.ToArray();
+        _movies = await movieManager.GetAllMovies();
         _movieTheaters = (await Http.GetFromJsonAsync<GetAllMovieTheatersResponse>("api/movietheaters")).MovieTheaters.ToArray();
     }
 }

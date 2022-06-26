@@ -1,6 +1,9 @@
 ﻿@page "/"
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.UI.Utilities.MovieManager
+
 @inject HttpClient Http
+@inject IMovieManager movieManager
 @inject NavigationManager NavManager
 
 <PageTitle>Index</PageTitle>
@@ -41,6 +44,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        movies = (await Http.GetFromJsonAsync<GetAllMoviesResponse>("api/movies")).Movies.ToArray();
+        movies = await movieManager.GetAllMovies();
     }
 }

@@ -1,13 +1,16 @@
-﻿@page "/reserve/{Id:guid}"
+@page "/reserve/{Id:guid}"
+@using System.Net.Http.Json
+@using System.Text
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieTheater
 @using MovieTheaterProject.Domain.Contracts.Responses.MovieViewing
 @using MovieTheaterProject.Domain.Contracts.Responses.Reservation
 @using MovieTheaterProject.Domain.Contracts.Requests.Reservation
 @using MovieTheaterProject.Domain.Entities
-@using System.Net.Http.Json
-@using System.Text
+@using MovieTheaterProject.UI.Utilities.MovieManager
+@using MovieTheaterProject.UI.Utilities.MovieViewingManager
 @inject HttpClient Http
+@inject IMovieManager movieManager
 @inject NavigationManager NavManager
 
 @if (!_dataLoaded)
@@ -165,7 +168,7 @@ else
         if (_movieViewing is null)
             throw new Exception();
 
-        var movieTmp = await Http.GetFromJsonAsync<MovieResponse>($"api/movies/{_movieViewing.MovieId}");
+        var movieTmp = await movieManager.GetMovieById(_movieViewing.MovieId);
         if (movieTmp is null)
             throw new Exception();
 

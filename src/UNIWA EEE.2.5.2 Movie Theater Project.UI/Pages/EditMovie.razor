@@ -2,9 +2,11 @@
 @using MovieTheaterProject.Domain
 @using MovieTheaterProject.Domain.Contracts.Requests.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.UI.Utilities.MovieManager
 
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IMovieManager movieManager
 @inject NavigationManager NavManager
 
 <h3>Update Movie</h3>
@@ -158,7 +160,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _movie = await Http.GetFromJsonAsync<MovieResponse>($"/api/movies/{Id}");
+        _movie = await movieManager.GetMovieById(Id);
         if (_movie is null)
             NavManager.NavigateTo($"/404");
         MovieName = _movie!.Name;

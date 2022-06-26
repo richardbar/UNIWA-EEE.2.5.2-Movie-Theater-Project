@@ -2,9 +2,11 @@
 @using MovieTheaterProject.Domain
 @using MovieTheaterProject.Domain.Contracts.Requests.Movie
 @using MovieTheaterProject.Domain.Contracts.Responses.Movie
+@using MovieTheaterProject.UI.Utilities.MovieManager
 
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IMovieManager movieManager
 @inject NavigationManager NavManager
 
 <h3>Create Movie</h3>
@@ -232,17 +234,7 @@
         if (_movieName is null || _movieDescription is null)
             return;
 
-        var createMovieRequest = new CreateMovieRequest()
-        {
-            Name = MovieName,
-            Description = MovieDescription,
-            Price = MoviePrice,
-            Duration = _movieDuration
-        };
-
-        using var response = await Http.PostAsJsonAsync<CreateMovieRequest>("api/movies", createMovieRequest);
-
-        var movie = await response.Content.ReadFromJsonAsync<MovieResponse>();
+        await movieManager.CreateMovie(MovieName, MovieDescription, MoviePrice, _movieDuration);
 
         await JS.InvokeVoidAsync("AddToast", 
             $"Created a movie with the name \"{MovieName}\" priced it at {MoviePrice} and lasts {MovieDurationHour}:{MovieDurationMinute}:00", 
