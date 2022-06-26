@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MovieTheaterProject.UI;
 using MovieTheaterProject.UI.Utilities.LoginManager;
+using MovieTheaterProject.UI.Utilities.MovieManager;
 using MovieTheaterProject.UI.Utilities.MovieViewingManager;
 using MovieTheaterProject.UI.Utilities.ReservationManager;
 
@@ -15,6 +16,7 @@ builder.Services.AddBlazoredLocalStorage();
 
 
 builder.Services.AddTransient<ILoginManager, LoginManager>();
+builder.Services.AddTransient<IMovieManager, MovieManager>();
 builder.Services.AddTransient<IMovieViewingManager, MovieViewingManager>();
 builder.Services.AddTransient<IReservationManager, ReservationManager>();
 
