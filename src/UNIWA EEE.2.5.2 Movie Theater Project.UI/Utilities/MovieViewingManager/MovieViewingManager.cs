@@ -31,6 +31,23 @@ public sealed class MovieViewingManager : IMovieViewingManager
         return movieViewings;
     }
 
+    public async Task<MovieViewingResponse[]?> GetAllMovieViewings()
+    {
+        try
+        {
+            var response = await _http.GetFromJsonAsync<GetAllMovieViewingsResponse>(s_apiURL);
+
+            if (response is null)
+                return null;
+
+            return response.MovieViewings.ToArray();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<MovieViewingResponse?> CreateMovieViewing(Guid movieId, Guid movieTheaterId, long startTime)
     {
         try
